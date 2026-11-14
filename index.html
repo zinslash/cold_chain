@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Cold Chain Temperature Regulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+<style>
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;
+  --border:#30363d;--text:#e6edf3;--text2:#8b949e;
+  --teal:#39d353;--teal-dim:#1a4a2a;
+  --blue:#58a6ff;--blue-dim:#0d2a4a;
+  --amber:#d29922;--amber-dim:#3d2a00;
+  --red:#f85149;--red-dim:#3d0f0f;
+  --purple:#bc8cff;
+  --radius:8px;--mono:'Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.hled{width:10px;height:10px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal);}
+.htitle{font-size:15px;font-weight:500;}
+.hsub{font-size:12px;color:var(--text2);}
+.hright{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.broker-pill{font-size:11px;font-family:var(--mono);background:var(--teal-dim);color:var(--teal);border:1px solid #1a4a2a;border-radius:4px;padding:3px 10px;}
+.broker-pill.off{background:var(--red-dim);color:var(--red);border-color:var(--red);}
+.broker-pill.connecting{background:var(--amber-dim);color:var(--amber);border-color:var(--amber);}
+
+.controls{background:var(--surface2);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:8px;flex-shrink:0;}
+.ctrl{font-size:11px;font-family:var(--mono);background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:5px 14px;cursor:pointer;transition:all .15s;}
+.ctrl:hover{border-color:var(--blue);color:var(--blue);}
+.ctrl.red:hover{border-color:var(--red);color:var(--red);}
+.ctrl.grn:hover{border-color:var(--teal);color:var(--teal);}
+
+.main{flex:1;display:grid;grid-template-columns:300px 1fr 300px;grid-template-rows:1fr 1fr;gap:0;overflow:hidden;}
+
+.panel{border-right:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;}
+.panel-head{padding:9px 14px 7px;border-bottom:1px solid var(--border);font-size:10px;font-weight:500;letter-spacing:.08em;color:var(--text2);text-transform:uppercase;flex-shrink:0;display:flex;align-items:center;gap:6px;}
+.panel-body{flex:1;overflow-y:auto;padding:10px;}
+
+.zone-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;}
+.zone-title{font-size:11px;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.zdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.node-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:.5px solid var(--border);}
+.node-row:last-child{border-bottom:none;}
+.node-id{font-family:var(--mono);font-size:11px;width:22px;flex-shrink:0;}
+.node-temp{font-size:19px;font-weight:300;font-family:var(--mono);flex:1;}
+.node-hum{font-size:11px;color:var(--text2);width:62px;text-align:right;}
+.node-st{font-size:9px;padding:1px 6px;border-radius:3px;flex-shrink:0;}
+.st-ok{background:var(--teal-dim);color:var(--teal);}
+.st-breach{background:var(--red-dim);color:var(--red);}
+.st-off{background:var(--amber-dim);color:var(--amber);}
+.kill-btn{font-size:9px;background:none;border:1px solid var(--border);color:var(--text2);border-radius:3px;padding:1px 7px;cursor:pointer;}
+.kill-btn:hover{border-color:var(--red);color:var(--red);}
+.kill-btn.dead{border-color:var(--teal);color:var(--teal);}
+
+.mqtt-log{flex:1;overflow-y:auto;font-family:var(--mono);font-size:11px;padding:4px 0;}
+.lr{display:flex;gap:6px;padding:3px 12px;border-left:2px solid transparent;}
+.lr:hover{background:var(--surface2);}
+.lr.pub{border-left-color:var(--blue);}
+.lr.alert-r{border-left-color:var(--red);background:rgba(248,81,73,.05);}
+.lr.ctrl-r{border-left-color:var(--purple);}
+.lr.lwt-r{border-left-color:var(--amber);background:rgba(210,153,34,.04);}
+.lr.sys-r{border-left-color:var(--border);}
+.ltime{color:var(--text2);flex-shrink:0;width:48px;}
+.ltopic{flex-shrink:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tc-blue{color:var(--blue);}
+.tc-red{color:var(--red);}
+.tc-purple{color:var(--purple);}
+.tc-amber{color:var(--amber);}
+.tc-gray{color:var(--text2);}
+.lpayload{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mcnt{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--text2);}
+
+.alert-log{flex:1;overflow-y:auto;}
+.alert-row{display:flex;align-items:center;gap:6px;padding:6px 12px;border-bottom:.5px solid var(--border);font-size:11px;font-family:var(--mono);}
+.ab{font-size:9px;padding:1px 5px;border-radius:3px;flex-shrink:0;}
+.ab-b{background:var(--red-dim);color:var(--red);border:1px solid var(--red);}
+.ab-r{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);}
+.ab-l{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber);}
+.atime{margin-left:auto;color:var(--text2);font-size:10px;}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.blinking{animation:blink .8s infinite;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--border);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hled"></div>
+  <span class="htitle">Cold Chain Temperature Regulator</span>
+  <span class="hsub">— RPL DODAG + MQTT + ESP32</span>
+  <div class="hright">
+    <span class="broker-pill connecting" id="brokerPill">BROKER: CONNECTING…</span>
+    <span style="font-size:11px;font-family:var(--mono);color:var(--text2)" id="tickPill">tick: 0</span>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="ctrl red" onclick="triggerBreach()">⚠ Trigger S6 Breach</button>
+  <button class="ctrl grn" onclick="healAll()">↺ Heal All Nodes</button>
+  <button class="ctrl red" onclick="killRandom()">☠ Kill Random Node</button>
+  <button class="ctrl"     onclick="clearLog()">✕ Clear Log</button>
+</div>
+
+<div class="main">
+
+  <!-- col 1: zones (spans both rows) -->
+  <div class="panel" style="grid-row:1/3;">
+    <div class="panel-head">Sensor nodes — 3 zones</div>
+    <div class="panel-body" id="zonesContainer"></div>
+  </div>
+
+  <!-- col 2 row 1: DODAG -->
+  <div class="panel" style="grid-row:1/2;">
+    <div class="panel-head">DODAG topology — live</div>
+    <canvas id="dogCanvas" style="flex:1;width:100%;"></canvas>
+  </div>
+
+  <!-- col 2 row 2: temp chart -->
+  <div class="panel" style="grid-row:2/3;position:relative;">
+    <div class="panel-head">S6 temperature history (Zone C)</div>
+    <canvas id="tempChart" style="position:absolute;top:36px;left:0;width:100%;height:calc(100% - 36px);"></canvas>
+  </div>
+
+  <!-- col 3 row 1: MQTT log -->
+  <div class="panel" style="grid-row:1/2;border-right:none;">
+    <div class="panel-head">MQTT log <span class="mcnt" id="mcnt">0 msgs</span></div>
+    <div class="mqtt-log" id="mqttLog"></div>
+  </div>
+
+  <!-- col 3 row 2: alerts -->
+  <div class="panel" style="grid-row:2/3;border-right:none;">
+    <div class="panel-head">Alert events</div>
+    <div class="alert-log" id="alertLog"></div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ──
+const BROKER_HOST = 'broker.hivemq.com';
+const BROKER_PORT = 8000;   // WebSocket port for hivemq
+
+const ZONES={
+  A:{label:'Zone A — freezer',color:'#39d353',range:[-25,-15],nodes:['S1','S2']},
+  B:{label:'Zone B — chiller',color:'#58a6ff',range:[0,5],    nodes:['S3','S4']},
+  C:{label:'Zone C — dock',   color:'#d29922',range:[2,8],    nodes:['S5','S6']},
+};
+const NODE_ZONE={S1:'A',S2:'A',S3:'B',S4:'B',S5:'C',S6:'C'};
+const THRESHOLDS={
+  zoneA:{lo:-25,hi:-15,opt:-18},
+  zoneB:{lo:0,hi:5,opt:2},
+  zoneC:{lo:2,hi:8,opt:5},
+};
+const DOG={
+  root:{rank:1,alive:true,parent:null},
+  routerA:{rank:2,alive:true,parent:'root'},
+  routerB:{rank:2,alive:true,parent:'root'},
+  routerC:{rank:2,alive:true,parent:'root'},
+  S1:{rank:3,alive:true,parent:'routerA'},
+  S2:{rank:3,alive:true,parent:'routerA'},
+  S3:{rank:3,alive:true,parent:'routerB'},
+  S4:{rank:3,alive:true,parent:'routerB'},
+  S5:{rank:3,alive:true,parent:'routerC'},
+  S6:{rank:3,alive:true,parent:'routerC'},
+};
+const NODE_COL={
+  root:'#888780',
+  routerA:'#AFA9EC',routerB:'#AFA9EC',routerC:'#AFA9EC',
+  S1:'#39d353',S2:'#39d353',
+  S3:'#58a6ff',S4:'#58a6ff',
+  S5:'#d29922',S6:'#d29922',
+};
+
+let tick=0,msgTotal=0,client=null;
+let s6Hist=[],maxHist=50;
+
+// ── ZONE UI ──
+function buildZones(){
+  const c=document.getElementById('zonesContainer');
+  c.innerHTML='';
+  ['A','B','C'].forEach(zid=>{
+    const z=ZONES[zid];
+    const d=document.createElement('div');
+    d.className='zone-card';
+    d.innerHTML=`
+      <div class="zone-title">
+        <div class="zdot" style="background:${z.color}"></div>
+        <span style="color:${z.color}">${z.label}</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--text2)">${z.range[0]} to ${z.range[1]} °C</span>
+      </div>
+      ${z.nodes.map(n=>`
+        <div class="node-row" id="row-${n}">
+          <span class="node-id" style="color:${z.color}">${n}</span>
+          <span class="node-temp" id="temp-${n}" style="color:${z.color}">--.-</span>
+          <span class="node-hum"  id="hum-${n}">-- % RH</span>
+          <span class="node-st st-ok" id="st-${n}">online</span>
+          <button class="kill-btn" id="btn-${n}" onclick="toggleNode('${n}')">kill</button>
+        </div>`).join('')}`;
+    c.appendChild(d);
+  });
+}
+
+function updateNode(nid,temp,hum,breach){
+  const tEl=document.getElementById('temp-'+nid);
+  const hEl=document.getElementById('hum-'+nid);
+  const sEl=document.getElementById('st-'+nid);
+  if(!tEl)return;
+  const col=ZONES[NODE_ZONE[nid]].color;
+  tEl.textContent=temp.toFixed(1);
+  tEl.style.color=breach?'var(--red)':col;
+  if(hum!==undefined) hEl.textContent=hum.toFixed(1)+'% RH';
+  if(breach){
+    sEl.textContent='BREACH';sEl.className='node-st st-breach';
+    tEl.classList.add('blinking');
+  } else {
+    sEl.textContent='online';sEl.className='node-st st-ok';
+    tEl.classList.remove('blinking');
+  }
+}
+
+function markDead(nid){
+  DOG[nid].alive=false;
+  const tEl=document.getElementById('temp-'+nid);
+  const sEl=document.getElementById('st-'+nid);
+  const btn=document.getElementById('btn-'+nid);
+  if(tEl){tEl.textContent='--.-';tEl.classList.remove('blinking');}
+  if(sEl){sEl.textContent='offline';sEl.className='node-st st-off';}
+  if(btn){btn.textContent='revive';btn.className='kill-btn dead';}
+  drawDodag();
+}
+
+function markAlive(nid){
+  DOG[nid].alive=true;
+  const sEl=document.getElementById('st-'+nid);
+  const btn=document.getElementById('btn-'+nid);
+  if(sEl){sEl.textContent='online';sEl.className='node-st st-ok';}
+  if(btn){btn.textContent='kill';btn.className='kill-btn';}
+  drawDodag();
+}
+
+// ── DODAG CANVAS ──
+function drawDodag(){
+  const cv=document.getElementById('dogCanvas');
+  if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.clientWidth||400,H=cv.clientHeight||260;
+  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+
+  const P={
+    root:   {x:W*.50,y:22},
+    routerA:{x:W*.17,y:H*.44},
+    routerB:{x:W*.50,y:H*.44},
+    routerC:{x:W*.83,y:H*.44},
+    S1:{x:W*.08,y:H*.82},S2:{x:W*.26,y:H*.82},
+    S3:{x:W*.42,y:H*.82},S4:{x:W*.58,y:H*.82},
+    S5:{x:W*.74,y:H*.82},S6:{x:W*.92,y:H*.82},
+  };
+  const EDGES=[
+    ['root','routerA'],['root','routerB'],['root','routerC'],
+    ['routerA','S1'],['routerA','S2'],
+    ['routerB','S3'],['routerB','S4'],
+    ['routerC','S5'],['routerC','S6'],
+  ];
+
+  // draw edges
+  EDGES.forEach(([a,b])=>{
+    const alive=DOG[b]?.alive!==false;
+    ctx.beginPath();
+    ctx.moveTo(P[a].x,P[a].y);ctx.lineTo(P[b].x,P[b].y);
+    ctx.strokeStyle=alive?(NODE_COL[b]+'50'):'#30363d';
+    ctx.lineWidth=alive?1.5:.5;
+    ctx.setLineDash(alive?[]:[3,3]);
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // draw nodes
+  Object.entries(P).forEach(([k,p])=>{
+    const isLeaf=k.startsWith('S');
+    const alive=DOG[k]?.alive!==false;
+    const r=k==='root'?16:isLeaf?12:13;
+    const col=alive?(NODE_COL[k]||'#9FE1CB'):'#30363d';
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
+    ctx.fillStyle=col+'20';ctx.fill();
+    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle=col;
+    ctx.font=`${isLeaf?9:10}px monospace`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(k,p.x,p.y);
+    ctx.fillStyle='#8b949e';ctx.font='8px monospace';
+    ctx.fillText('r'+(DOG[k]?.rank||'?'),p.x,p.y+r+8);
+  });
+}
+
+// ── TEMP HISTORY CHART ──
+function drawChart(){
+  const cv=document.getElementById('tempChart');
+  if(!cv||s6Hist.length<2)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.clientWidth||400,H=cv.clientHeight||200;
+  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  const pad={l:34,r:8,t:8,b:22};
+  const iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
+
+  const lo=0,hi=14;
+  const toX=i=>pad.l+(i/(maxHist-1))*iw;
+  const toY=v=>pad.t+ih-((v-lo)/(hi-lo))*ih;
+
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+
+  // safe band
+  ctx.fillStyle='rgba(88,164,255,.07)';
+  ctx.fillRect(pad.l,toY(8),iw,toY(2)-toY(8));
+
+  // threshold lines
+  [2,8].forEach(v=>{
+    ctx.beginPath();ctx.moveTo(pad.l,toY(v));ctx.lineTo(pad.l+iw,toY(v));
+    ctx.strokeStyle='#d2992250';ctx.lineWidth=.5;ctx.setLineDash([4,3]);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#d29922';ctx.font='9px monospace';ctx.textAlign='right';
+    ctx.fillText(v+'°',pad.l-3,toY(v)+3);
+  });
+
+  // axis
+  ctx.fillStyle='#8b949e';ctx.font='9px monospace';ctx.textAlign='center';
+  ctx.fillText('oldest',pad.l,H-5);
+  ctx.fillText('now',pad.l+iw,H-5);
+
+  // line
+  ctx.beginPath();
+  s6Hist.forEach((v,i)=>{const x=toX(i),y=toY(v);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.strokeStyle='#d29922';ctx.lineWidth=1.5;ctx.stroke();
+
+  // breach dots
+  s6Hist.forEach((v,i)=>{
+    if(v>8||v<2){
+      ctx.beginPath();ctx.arc(toX(i),toY(v),3,0,Math.PI*2);
+      ctx.fillStyle='#f85149';ctx.fill();
+    }
+  });
+}
+
+// ── MQTT LOG ──
+function ts(){
+  const d=new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+}
+
+function logMsg(type,topic,payload){
+  msgTotal++;
+  document.getElementById('mcnt').textContent=msgTotal+' msgs';
+  const log=document.getElementById('mqttLog');
+  const tc=type==='alert-r'?'tc-red':type==='ctrl-r'?'tc-purple':type==='lwt-r'?'tc-amber':'tc-blue';
+  const d=document.createElement('div');
+  d.className='lr '+type;
+  d.innerHTML=`<span class="ltime">${ts()}</span><span class="ltopic ${tc}">${topic}</span><span class="lpayload">${payload.substring(0,55)}</span>`;
+  log.appendChild(d);
+  if(log.children.length>400)log.removeChild(log.firstChild);
+  log.scrollTop=log.scrollHeight;
+}
+
+function addAlert(type,text){
+  const log=document.getElementById('alertLog');
+  const badge=type==='breach'?'<span class="ab ab-b">BREACH</span>':
+               type==='recover'?'<span class="ab ab-r">RECOVER</span>':
+               '<span class="ab ab-l">LWT</span>';
+  const d=document.createElement('div');
+  d.className='alert-row';
+  d.innerHTML=`${badge}<span>${text}</span><span class="atime">${ts()}</span>`;
+  log.prepend(d);
+  if(log.children.length>40)log.removeChild(log.lastChild);
+}
+
+// ── MQTT ──
+function connectBroker(){
+  const id='dash_'+Math.random().toString(36).substr(2,9);
+  client=new Paho.MQTT.Client(BROKER_HOST,BROKER_PORT,id);
+
+  client.onConnectionLost=function(){
+    document.getElementById('brokerPill').textContent='BROKER: RECONNECTING…';
+    document.getElementById('brokerPill').className='broker-pill connecting';
+    setTimeout(connectBroker,3000);
+  };
+
+  client.onMessageArrived=function(msg){
+    const topic=msg.destinationName;
+    const payload=msg.payloadString;
+
+    let type='pub';
+    if(topic.includes('alerts/breach'))   type='alert-r';
+    else if(topic.includes('alerts/recover')) type='alert-r';
+    else if(topic.includes('control'))    type='ctrl-r';
+    else if(topic.includes('status')&&payload==='offline') type='lwt-r';
+
+    logMsg(type,topic,payload);
+
+    // temperature
+    if(topic.includes('/temperature')){
+      try{
+        const d=JSON.parse(payload);
+        const nid=d.node;
+        if(!nid)return;
+        const zone='zone'+NODE_ZONE[nid];
+        const cfg=THRESHOLDS[zone];
+        const breach=cfg&&(d.temp>cfg.hi||d.temp<cfg.lo);
+        updateNode(nid,d.temp,d.hum,breach);
+        if(nid==='S6'){s6Hist.push(d.temp);if(s6Hist.length>maxHist)s6Hist.shift();}
+        tick++;
+        document.getElementById('tickPill').textContent='tick: '+tick;
+      }catch(e){}
+    }
+
+    // status
+    if(topic.includes('/status')){
+      const parts=topic.split('/');
+      const nid=parts[2];
+      if(payload==='offline'&&DOG[nid]){markDead(nid);addAlert('lwt',nid+' offline — LWT published');}
+      else if(payload==='online'&&DOG[nid]){markAlive(nid);}
+    }
+
+    // alerts
+    if(topic.includes('alerts/breach')){
+      try{const d=JSON.parse(payload);addAlert('breach',`${d.node} ${d.zone} ${d.temp}°C [${d.type||''}]`);}catch(e){}
+    }
+    if(topic.includes('alerts/recover')){
+      try{const d=JSON.parse(payload);addAlert('recover',`${d.zone} back in range after ${d.duration_s}s`);}catch(e){}
+    }
+  };
+
+  const opts={
+    onSuccess:function(){
+      document.getElementById('brokerPill').textContent='BROKER: ONLINE';
+      document.getElementById('brokerPill').className='broker-pill';
+      client.subscribe('coldchain/#',{qos:0});
+      logMsg('sys-r','system','Connected to broker.hivemq.com — subscribed coldchain/#');
+    },
+    onFailure:function(e){
+      document.getElementById('brokerPill').textContent='BROKER: FAILED ('+e.errorMessage+')';
+      document.getElementById('brokerPill').className='broker-pill off';
+      setTimeout(connectBroker,4000);
+    },
+    keepAliveInterval:30,
+    cleanSession:true,
+    useSSL:false,
+  };
+
+  try{client.connect(opts);}
+  catch(e){
+    document.getElementById('brokerPill').textContent='BROKER: ERROR';
+    document.getElementById('brokerPill').className='broker-pill off';
+    setTimeout(connectBroker,4000);
+  }
+}
+
+// ── CONTROLS ──
+function toggleNode(nid){
+  if(!client||!client.isConnected())return;
+  if(DOG[nid].alive){
+    const m=new Paho.MQTT.Message('offline');
+    m.destinationName='coldchain/zone'+NODE_ZONE[nid]+'/'+nid+'/status';
+    m.retained=true;m.qos=1;client.send(m);
+    markDead(nid);addAlert('lwt',nid+' manually killed');
+  } else {
+    DOG[nid].alive=true;
+    const m=new Paho.MQTT.Message('online');
+    m.destinationName='coldchain/zone'+NODE_ZONE[nid]+'/'+nid+'/status';
+    m.retained=true;m.qos=1;client.send(m);
+    markAlive(nid);addAlert('recover',nid+' revived — rejoined DODAG');
+  }
+}
+
+function triggerBreach(){
+  if(!client||!client.isConnected())return;
+  const a=JSON.stringify({node:'S6',zone:'zoneC',temp:14.0,type:'COOLING',range:[2,8],optimum:5,ts:Date.now()});
+  const m=new Paho.MQTT.Message(a);
+  m.destinationName='coldchain/alerts/breach';m.qos=1;client.send(m);
+  addAlert('breach','S6 manual trigger +14°C');
+}
+
+function healAll(){
+  ['S1','S2','S3','S4','S5','S6'].forEach(n=>{if(!DOG[n].alive)toggleNode(n);});
+}
+
+function killRandom(){
+  const a=Object.keys(DOG).filter(k=>k.startsWith('S')&&DOG[k].alive);
+  if(a.length)toggleNode(a[Math.floor(Math.random()*a.length)]);
+}
+
+function clearLog(){
+  document.getElementById('mqttLog').innerHTML='';
+  msgTotal=0;document.getElementById('mcnt').textContent='0 msgs';
+}
+
+// ── BOOT ──
+buildZones();
+drawDodag();
+connectBroker();
+setInterval(()=>{drawDodag();drawChart();},2000);
+window.addEventListener('resize',()=>{drawDodag();drawChart();});
+</script>
+</body>
+</html>

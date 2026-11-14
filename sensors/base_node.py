@@ -3,7 +3,7 @@ import threading, time, json, random
 
 class SensorNode(threading.Thread):
     def __init__(self, node_id, zone, base_temp,
-                 temp_range, optimum, broker="localhost"):
+                 temp_range, optimum, broker="broker.hivemq.com"):
         super().__init__(daemon=True)
         self.node_id   = node_id
         self.zone      = zone

@@ -8,7 +8,7 @@ THRESHOLDS = {
 }
 
 class AlertEngine:
-    def __init__(self, broker="localhost"):
+    def __init__(self, broker="broker.hivemq.com"):
         self.active = {}   # zones currently in breach
         self.client = mqtt.Client(client_id="alert_engine")
         self.client.on_message = self._on_message

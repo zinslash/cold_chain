@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import json, os, time
 
 class Dashboard:
-    def __init__(self, broker="localhost"):
+    def __init__(self, broker="broker.hivemq.com"):
         self.readings = {}
         self.alerts   = []
         self.client   = mqtt.Client(client_id="dashboard")

@@ -8,7 +8,7 @@ from application.alert_engine import AlertEngine
 from application.data_logger  import DataLogger
 from application.dashboard    import Dashboard
 
-BROKER = "localhost"
+BROKER = "broker.hivemq.com"
 
 if __name__ == "__main__":
     print("=== Cold Chain Temperature Regulator ===")
