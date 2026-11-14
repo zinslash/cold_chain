@@ -144,7 +144,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <script>
 // ── CONFIG ──
 const BROKER_HOST = 'broker.hivemq.com';
-const BROKER_PORT = 8000;   // WebSocket port for hivemq
+const BROKER_PORT = 8884;   // WSS (secure WebSocket) port for HTTPS hosting
 
 const ZONES={
   A:{label:'Zone A — freezer',color:'#39d353',range:[-25,-15],nodes:['S1','S2']},
@@ -450,7 +450,7 @@ function connectBroker(){
     },
     keepAliveInterval:30,
     cleanSession:true,
-    useSSL:false,
+    useSSL:true,   // FIXED: required for HTTPS-hosted pages
   };
 
   try{client.connect(opts);}
