@@ -34,53 +34,66 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .ctrl.red:hover{border-color:var(--red);color:var(--red);}
 .ctrl.grn:hover{border-color:var(--teal);color:var(--teal);}
 
-.main{flex:1;display:grid;grid-template-columns:300px 1fr 300px;grid-template-rows:1fr 1fr;gap:0;overflow:hidden;}
+.main{flex:1;display:grid;grid-template-columns:270px 1fr 220px 270px;grid-template-rows:1fr 1fr;gap:0;overflow:hidden;}
 
 .panel{border-right:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;}
 .panel-head{padding:9px 14px 7px;border-bottom:1px solid var(--border);font-size:10px;font-weight:500;letter-spacing:.08em;color:var(--text2);text-transform:uppercase;flex-shrink:0;display:flex;align-items:center;gap:6px;}
 .panel-body{flex:1;overflow-y:auto;padding:10px;}
 
 .zone-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;}
-.zone-title{font-size:11px;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.zone-title{font-size:11px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
 .zdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.node-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:.5px solid var(--border);}
+.node-row{display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:.5px solid var(--border);}
 .node-row:last-child{border-bottom:none;}
 .node-id{font-family:var(--mono);font-size:11px;width:22px;flex-shrink:0;}
-.node-temp{font-size:19px;font-weight:300;font-family:var(--mono);flex:1;}
-.node-hum{font-size:11px;color:var(--text2);width:62px;text-align:right;}
-.node-st{font-size:9px;padding:1px 6px;border-radius:3px;flex-shrink:0;}
+.node-temp{font-size:18px;font-weight:300;font-family:var(--mono);flex:1;}
+.node-hum{font-size:10px;color:var(--text2);width:58px;text-align:right;}
+.node-age{font-size:9px;color:var(--text2);width:36px;text-align:right;font-family:var(--mono);}
+.node-st{font-size:9px;padding:1px 5px;border-radius:3px;flex-shrink:0;}
 .st-ok{background:var(--teal-dim);color:var(--teal);}
 .st-breach{background:var(--red-dim);color:var(--red);}
 .st-off{background:var(--amber-dim);color:var(--amber);}
-.kill-btn{font-size:9px;background:none;border:1px solid var(--border);color:var(--text2);border-radius:3px;padding:1px 7px;cursor:pointer;}
+.kill-btn{font-size:9px;background:none;border:1px solid var(--border);color:var(--text2);border-radius:3px;padding:1px 6px;cursor:pointer;}
 .kill-btn:hover{border-color:var(--red);color:var(--red);}
 .kill-btn.dead{border-color:var(--teal);color:var(--teal);}
 
+.stat-zone{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 11px;margin-bottom:8px;}
+.stat-zone-title{font-size:10px;font-weight:600;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;}
+.stat-cell{background:var(--bg);border-radius:4px;padding:5px 6px;text-align:center;}
+.stat-label{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+.stat-val{font-size:14px;font-family:var(--mono);font-weight:300;}
+.stat-val.breach-col{color:var(--red);}
+
 .mqtt-log{flex:1;overflow-y:auto;font-family:var(--mono);font-size:11px;padding:4px 0;}
-.lr{display:flex;gap:6px;padding:3px 12px;border-left:2px solid transparent;}
+.lr{display:flex;gap:6px;padding:3px 10px;border-left:2px solid transparent;}
 .lr:hover{background:var(--surface2);}
 .lr.pub{border-left-color:var(--blue);}
 .lr.alert-r{border-left-color:var(--red);background:rgba(248,81,73,.05);}
 .lr.ctrl-r{border-left-color:var(--purple);}
 .lr.lwt-r{border-left-color:var(--amber);background:rgba(210,153,34,.04);}
 .lr.sys-r{border-left-color:var(--border);}
-.ltime{color:var(--text2);flex-shrink:0;width:48px;}
-.ltopic{flex-shrink:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ltime{color:var(--text2);flex-shrink:0;width:46px;}
+.ltopic{flex-shrink:0;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .tc-blue{color:var(--blue);}
 .tc-red{color:var(--red);}
 .tc-purple{color:var(--purple);}
 .tc-amber{color:var(--amber);}
-.tc-gray{color:var(--text2);}
 .lpayload{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mcnt{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--text2);}
 
 .alert-log{flex:1;overflow-y:auto;}
-.alert-row{display:flex;align-items:center;gap:6px;padding:6px 12px;border-bottom:.5px solid var(--border);font-size:11px;font-family:var(--mono);}
+.alert-row{display:flex;align-items:center;gap:6px;padding:5px 10px;border-bottom:.5px solid var(--border);font-size:11px;font-family:var(--mono);}
 .ab{font-size:9px;padding:1px 5px;border-radius:3px;flex-shrink:0;}
 .ab-b{background:var(--red-dim);color:var(--red);border:1px solid var(--red);}
 .ab-r{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);}
 .ab-l{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber);}
 .atime{margin-left:auto;color:var(--text2);font-size:10px;}
+
+.chart-tabs{display:flex;gap:0;flex-shrink:0;}
+.chart-tab{font-size:10px;font-family:var(--mono);padding:5px 14px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;}
+.chart-tab.active{color:var(--text);border-bottom-color:var(--blue);}
+.chart-tab:hover{color:var(--text);}
 
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 .blinking{animation:blink .8s infinite;}
@@ -109,31 +122,41 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <div class="main">
 
-  <!-- col 1: zones (spans both rows) -->
+  <!-- col 1: zones -->
   <div class="panel" style="grid-row:1/3;">
     <div class="panel-head">Sensor nodes — 3 zones</div>
     <div class="panel-body" id="zonesContainer"></div>
   </div>
 
-  <!-- col 2 row 1: DODAG -->
+  <!-- col 2 row 1: DODAG animated canvas -->
   <div class="panel" style="grid-row:1/2;">
     <div class="panel-head">DODAG topology — live</div>
-    <canvas id="dogCanvas" style="flex:1;width:100%;"></canvas>
+    <canvas id="dogCanvas" style="flex:1;width:100%;display:block;"></canvas>
   </div>
 
-  <!-- col 2 row 2: temp chart -->
-  <div class="panel" style="grid-row:2/3;position:relative;">
-    <div class="panel-head">S6 temperature history (Zone C)</div>
-    <canvas id="tempChart" style="position:absolute;top:36px;left:0;width:100%;height:calc(100% - 36px);"></canvas>
+  <!-- col 2 row 2: chart tabs -->
+  <div class="panel" style="grid-row:2/3;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <button class="chart-tab active" id="tabTemp" onclick="switchChart('temp')">🌡 S6 Temp</button>
+      <button class="chart-tab" id="tabHum" onclick="switchChart('hum')">💧 S6 Humidity</button>
+    </div>
+    <canvas id="tempChart" style="flex:1;width:100%;display:block;"></canvas>
+    <canvas id="humChart"  style="flex:1;width:100%;display:none;"></canvas>
   </div>
 
-  <!-- col 3 row 1: MQTT log -->
+  <!-- col 3: stats -->
+  <div class="panel" style="grid-row:1/3;">
+    <div class="panel-head">Zone stats — min / avg / max</div>
+    <div class="panel-body" id="statsContainer"></div>
+  </div>
+
+  <!-- col 4 row 1: MQTT log -->
   <div class="panel" style="grid-row:1/2;border-right:none;">
     <div class="panel-head">MQTT log <span class="mcnt" id="mcnt">0 msgs</span></div>
     <div class="mqtt-log" id="mqttLog"></div>
   </div>
 
-  <!-- col 3 row 2: alerts -->
+  <!-- col 4 row 2: alerts -->
   <div class="panel" style="grid-row:2/3;border-right:none;">
     <div class="panel-head">Alert events</div>
     <div class="alert-log" id="alertLog"></div>
@@ -142,23 +165,25 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 </div>
 
 <script>
-// ── CONFIG ──
+// ════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════
 const BROKER_HOST = 'broker.hivemq.com';
-const BROKER_PORT = 8884;   // WSS (secure WebSocket) port for HTTPS hosting
+const BROKER_PORT = 8884;
 
-const ZONES={
-  A:{label:'Zone A — freezer',color:'#39d353',range:[-25,-15],nodes:['S1','S2']},
-  B:{label:'Zone B — chiller',color:'#58a6ff',range:[0,5],    nodes:['S3','S4']},
-  C:{label:'Zone C — dock',   color:'#d29922',range:[2,8],    nodes:['S5','S6']},
+const ZONES = {
+  A:{label:'Zone A — freezer', color:'#39d353', range:[-25,-15], nodes:['S1','S2']},
+  B:{label:'Zone B — chiller', color:'#58a6ff', range:[0,5],     nodes:['S3','S4']},
+  C:{label:'Zone C — dock',    color:'#d29922', range:[2,8],     nodes:['S5','S6']},
 };
-const NODE_ZONE={S1:'A',S2:'A',S3:'B',S4:'B',S5:'C',S6:'C'};
-const THRESHOLDS={
-  zoneA:{lo:-25,hi:-15,opt:-18},
-  zoneB:{lo:0,hi:5,opt:2},
-  zoneC:{lo:2,hi:8,opt:5},
+const NODE_ZONE = {S1:'A',S2:'A',S3:'B',S4:'B',S5:'C',S6:'C'};
+const THRESHOLDS = {
+  zoneA:{lo:-25,hi:-15},
+  zoneB:{lo:0,  hi:5},
+  zoneC:{lo:2,  hi:8},
 };
-const DOG={
-  root:{rank:1,alive:true,parent:null},
+const DOG = {
+  root:   {rank:1,alive:true,parent:null},
   routerA:{rank:2,alive:true,parent:'root'},
   routerB:{rank:2,alive:true,parent:'root'},
   routerC:{rank:2,alive:true,parent:'root'},
@@ -169,7 +194,7 @@ const DOG={
   S5:{rank:3,alive:true,parent:'routerC'},
   S6:{rank:3,alive:true,parent:'routerC'},
 };
-const NODE_COL={
+const NODE_COL = {
   root:'#888780',
   routerA:'#AFA9EC',routerB:'#AFA9EC',routerC:'#AFA9EC',
   S1:'#39d353',S2:'#39d353',
@@ -177,18 +202,39 @@ const NODE_COL={
   S5:'#d29922',S6:'#d29922',
 };
 
-let tick=0,msgTotal=0,client=null;
-let s6Hist=[],maxHist=50;
+// ════════════════════════════════════════
+//  STATE  — declared ONCE
+// ════════════════════════════════════════
+let tick       = 0;
+let msgTotal   = 0;
+let client     = null;
+let activeChart = 'temp';
 
-// ── ZONE UI ──
+// Per-node runtime data
+const nodeData = {};
+['S1','S2','S3','S4','S5','S6'].forEach(n => {
+  nodeData[n] = {temp:null, hum:null, lastSeen:null, breach:false, tempHist:[], humHist:[]};
+});
+
+// Zone-level rolling buffers
+const zoneStats = {A:{temps:[],hums:[]}, B:{temps:[],hums:[]}, C:{temps:[],hums:[]}};
+
+// ── DODAG animation state ──
+const PULSE_MAX = 50; // frames a pulse travels
+const pulses = [];    // {edge, progress, color}
+let   animFrame = 0;
+
+// ════════════════════════════════════════
+//  ZONE UI
+// ════════════════════════════════════════
 function buildZones(){
-  const c=document.getElementById('zonesContainer');
-  c.innerHTML='';
-  ['A','B','C'].forEach(zid=>{
-    const z=ZONES[zid];
-    const d=document.createElement('div');
-    d.className='zone-card';
-    d.innerHTML=`
+  const c = document.getElementById('zonesContainer');
+  c.innerHTML = '';
+  ['A','B','C'].forEach(zid => {
+    const z = ZONES[zid];
+    const d = document.createElement('div');
+    d.className = 'zone-card';
+    d.innerHTML = `
       <div class="zone-title">
         <div class="zdot" style="background:${z.color}"></div>
         <span style="color:${z.color}">${z.label}</span>
@@ -199,6 +245,7 @@ function buildZones(){
           <span class="node-id" style="color:${z.color}">${n}</span>
           <span class="node-temp" id="temp-${n}" style="color:${z.color}">--.-</span>
           <span class="node-hum"  id="hum-${n}">-- % RH</span>
+          <span class="node-age"  id="age-${n}">--s</span>
           <span class="node-st st-ok" id="st-${n}">online</span>
           <button class="kill-btn" id="btn-${n}" onclick="toggleNode('${n}')">kill</button>
         </div>`).join('')}`;
@@ -206,306 +253,514 @@ function buildZones(){
   });
 }
 
-function updateNode(nid,temp,hum,breach){
-  const tEl=document.getElementById('temp-'+nid);
-  const hEl=document.getElementById('hum-'+nid);
-  const sEl=document.getElementById('st-'+nid);
-  if(!tEl)return;
-  const col=ZONES[NODE_ZONE[nid]].color;
-  tEl.textContent=temp.toFixed(1);
-  tEl.style.color=breach?'var(--red)':col;
-  if(hum!==undefined) hEl.textContent=hum.toFixed(1)+'% RH';
-  if(breach){
-    sEl.textContent='BREACH';sEl.className='node-st st-breach';
-    tEl.classList.add('blinking');
-  } else {
-    sEl.textContent='online';sEl.className='node-st st-ok';
-    tEl.classList.remove('blinking');
+// ════════════════════════════════════════
+//  STATS PANEL
+// ════════════════════════════════════════
+function buildStats(){
+  const c = document.getElementById('statsContainer');
+  c.innerHTML = '';
+  ['A','B','C'].forEach(zid => {
+    const z = ZONES[zid];
+    const d = document.createElement('div');
+    d.className = 'stat-zone';
+    d.innerHTML = `
+      <div class="stat-zone-title">
+        <div class="zdot" style="background:${z.color}"></div>
+        <span style="color:${z.color}">${z.label}</span>
+      </div>
+      <div style="font-size:9px;color:var(--text2);margin-bottom:5px;">TEMPERATURE (°C)</div>
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="stat-label">MIN</div><div class="stat-val" id="stTmin-${zid}">--</div></div>
+        <div class="stat-cell"><div class="stat-label">AVG</div><div class="stat-val" id="stTavg-${zid}">--</div></div>
+        <div class="stat-cell"><div class="stat-label">MAX</div><div class="stat-val" id="stTmax-${zid}">--</div></div>
+      </div>
+      <div style="font-size:9px;color:var(--text2);margin:6px 0 5px;">HUMIDITY (% RH)</div>
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="stat-label">MIN</div><div class="stat-val" id="stHmin-${zid}">--</div></div>
+        <div class="stat-cell"><div class="stat-label">AVG</div><div class="stat-val" id="stHavg-${zid}">--</div></div>
+        <div class="stat-cell"><div class="stat-label">MAX</div><div class="stat-val" id="stHmax-${zid}">--</div></div>
+      </div>`;
+    c.appendChild(d);
+  });
+}
+
+function refreshStats(zid){
+  const s   = zoneStats[zid];
+  const cfg = THRESHOLDS['zone'+zid];
+  if(s.temps.length){
+    const mn = Math.min(...s.temps), mx = Math.max(...s.temps);
+    const av = s.temps.reduce((a,b)=>a+b,0)/s.temps.length;
+    document.getElementById('stTmin-'+zid).textContent = mn.toFixed(1);
+    document.getElementById('stTmin-'+zid).className   = 'stat-val'+(mn<cfg.lo?' breach-col':'');
+    document.getElementById('stTavg-'+zid).textContent = av.toFixed(1);
+    document.getElementById('stTmax-'+zid).textContent = mx.toFixed(1);
+    document.getElementById('stTmax-'+zid).className   = 'stat-val'+(mx>cfg.hi?' breach-col':'');
+  }
+  if(s.hums.length){
+    const mn = Math.min(...s.hums), mx = Math.max(...s.hums);
+    const av = s.hums.reduce((a,b)=>a+b,0)/s.hums.length;
+    document.getElementById('stHmin-'+zid).textContent = mn.toFixed(1);
+    document.getElementById('stHavg-'+zid).textContent = av.toFixed(1);
+    document.getElementById('stHmax-'+zid).textContent = mx.toFixed(1);
   }
 }
 
+// ════════════════════════════════════════
+//  NODE UPDATE
+// ════════════════════════════════════════
+function updateNode(nid, temp, hum, breach){
+  const tEl = document.getElementById('temp-'+nid);
+  const hEl = document.getElementById('hum-'+nid);
+  const sEl = document.getElementById('st-'+nid);
+  if(!tEl) return;
+
+  const nd  = nodeData[nid];
+  const col = ZONES[NODE_ZONE[nid]].color;
+  nd.temp = temp; nd.hum = hum; nd.breach = breach; nd.lastSeen = Date.now();
+  nd.tempHist.push(temp); if(nd.tempHist.length > 50) nd.tempHist.shift();
+  if(hum != null){ nd.humHist.push(hum); if(nd.humHist.length > 50) nd.humHist.shift(); }
+
+  const zid = NODE_ZONE[nid];
+  zoneStats[zid].temps.push(temp); if(zoneStats[zid].temps.length > 200) zoneStats[zid].temps.shift();
+  if(hum != null){ zoneStats[zid].hums.push(hum); if(zoneStats[zid].hums.length > 200) zoneStats[zid].hums.shift(); }
+  refreshStats(zid);
+
+  tEl.textContent  = temp.toFixed(1);
+  tEl.style.color  = breach ? 'var(--red)' : col;
+  if(hum != null) hEl.textContent = hum.toFixed(1)+'% RH';
+
+  if(breach){
+    sEl.textContent = 'BREACH'; sEl.className = 'node-st st-breach';
+    tEl.classList.add('blinking');
+  } else {
+    sEl.textContent = 'online'; sEl.className = 'node-st st-ok';
+    tEl.classList.remove('blinking');
+  }
+
+  // spawn a data-pulse on the edge leading to this node
+  spawnPulse(nid, breach);
+}
+
+function updateAges(){
+  ['S1','S2','S3','S4','S5','S6'].forEach(nid => {
+    const el = document.getElementById('age-'+nid);
+    if(!el) return;
+    const nd = nodeData[nid];
+    if(!nd.lastSeen || !DOG[nid].alive){ el.textContent='--'; el.style.color='var(--text2)'; return; }
+    const s = Math.floor((Date.now()-nd.lastSeen)/1000);
+    el.textContent = s < 60 ? s+'s' : Math.floor(s/60)+'m';
+    el.style.color = s > 30 ? 'var(--red)' : 'var(--text2)';
+  });
+}
+
 function markDead(nid){
-  DOG[nid].alive=false;
-  const tEl=document.getElementById('temp-'+nid);
-  const sEl=document.getElementById('st-'+nid);
-  const btn=document.getElementById('btn-'+nid);
-  if(tEl){tEl.textContent='--.-';tEl.classList.remove('blinking');}
-  if(sEl){sEl.textContent='offline';sEl.className='node-st st-off';}
-  if(btn){btn.textContent='revive';btn.className='kill-btn dead';}
-  drawDodag();
+  DOG[nid].alive = false;
+  nodeData[nid].lastSeen = null;
+  const tEl = document.getElementById('temp-'+nid);
+  const sEl = document.getElementById('st-'+nid);
+  const btn = document.getElementById('btn-'+nid);
+  if(tEl){ tEl.textContent='--.-'; tEl.classList.remove('blinking'); }
+  if(sEl){ sEl.textContent='offline'; sEl.className='node-st st-off'; }
+  if(btn){ btn.textContent='revive'; btn.className='kill-btn dead'; }
 }
 
 function markAlive(nid){
-  DOG[nid].alive=true;
-  const sEl=document.getElementById('st-'+nid);
-  const btn=document.getElementById('btn-'+nid);
-  if(sEl){sEl.textContent='online';sEl.className='node-st st-ok';}
-  if(btn){btn.textContent='kill';btn.className='kill-btn';}
-  drawDodag();
+  DOG[nid].alive = true;
+  const sEl = document.getElementById('st-'+nid);
+  const btn = document.getElementById('btn-'+nid);
+  if(sEl){ sEl.textContent='online'; sEl.className='node-st st-ok'; }
+  if(btn){ btn.textContent='kill'; btn.className='kill-btn'; }
 }
 
-// ── DODAG CANVAS ──
-function drawDodag(){
-  const cv=document.getElementById('dogCanvas');
-  if(!cv)return;
-  const ctx=cv.getContext('2d');
-  const W=cv.clientWidth||400,H=cv.clientHeight||260;
-  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
-  ctx.scale(devicePixelRatio,devicePixelRatio);
-  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+// ════════════════════════════════════════
+//  DODAG — ANIMATED (requestAnimationFrame)
+// ════════════════════════════════════════
+const EDGES = [
+  ['root','routerA'],['root','routerB'],['root','routerC'],
+  ['routerA','S1'],['routerA','S2'],
+  ['routerB','S3'],['routerB','S4'],
+  ['routerC','S5'],['routerC','S6'],
+];
 
-  const P={
-    root:   {x:W*.50,y:22},
-    routerA:{x:W*.17,y:H*.44},
-    routerB:{x:W*.50,y:H*.44},
-    routerC:{x:W*.83,y:H*.44},
-    S1:{x:W*.08,y:H*.82},S2:{x:W*.26,y:H*.82},
-    S3:{x:W*.42,y:H*.82},S4:{x:W*.58,y:H*.82},
-    S5:{x:W*.74,y:H*.82},S6:{x:W*.92,y:H*.82},
+function getPositions(W, H){
+  return {
+    root:   {x:W*.50, y:22},
+    routerA:{x:W*.17, y:H*.44},
+    routerB:{x:W*.50, y:H*.44},
+    routerC:{x:W*.83, y:H*.44},
+    S1:{x:W*.08, y:H*.82}, S2:{x:W*.26, y:H*.82},
+    S3:{x:W*.42, y:H*.82}, S4:{x:W*.58, y:H*.82},
+    S5:{x:W*.74, y:H*.82}, S6:{x:W*.92, y:H*.82},
   };
-  const EDGES=[
-    ['root','routerA'],['root','routerB'],['root','routerC'],
-    ['routerA','S1'],['routerA','S2'],
-    ['routerB','S3'],['routerB','S4'],
-    ['routerC','S5'],['routerC','S6'],
-  ];
+}
 
-  // draw edges
-  EDGES.forEach(([a,b])=>{
-    const alive=DOG[b]?.alive!==false;
+function nodeColor(k){
+  if(!DOG[k]?.alive) return '#30363d';
+  if(k.startsWith('S') && nodeData[k]?.breach) return '#f85149';
+  return NODE_COL[k] || '#9FE1CB';
+}
+
+function spawnPulse(leafNode, breach){
+  // find edge ending at this leaf
+  const edge = EDGES.find(([,b]) => b === leafNode);
+  if(!edge) return;
+  const col = breach ? '#f85149' : (NODE_COL[leafNode] || '#fff');
+  pulses.push({edge, progress:0, color:col});
+  // also propagate from parent router up to root
+  const router = edge[0];
+  const rootEdge = EDGES.find(([,b]) => b === router);
+  if(rootEdge) pulses.push({edge:rootEdge, progress:0, color:col});
+}
+
+function animateDodag(){
+  requestAnimationFrame(animateDodag);
+  animFrame++;
+
+  const cv  = document.getElementById('dogCanvas');
+  if(!cv) return;
+  const ctx = cv.getContext('2d');
+  const W   = cv.clientWidth  || 400;
+  const H   = cv.clientHeight || 260;
+
+  // resize only when dimensions change
+  if(cv.width !== W * devicePixelRatio || cv.height !== H * devicePixelRatio){
+    cv.width  = W * devicePixelRatio;
+    cv.height = H * devicePixelRatio;
+  }
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+
+  const P = getPositions(W, H);
+
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, W, H);
+
+  // ── edges ──
+  EDGES.forEach(([a, b]) => {
+    const alive = DOG[b]?.alive !== false;
     ctx.beginPath();
-    ctx.moveTo(P[a].x,P[a].y);ctx.lineTo(P[b].x,P[b].y);
-    ctx.strokeStyle=alive?(NODE_COL[b]+'50'):'#30363d';
-    ctx.lineWidth=alive?1.5:.5;
-    ctx.setLineDash(alive?[]:[3,3]);
+    ctx.moveTo(P[a].x, P[a].y);
+    ctx.lineTo(P[b].x, P[b].y);
+    ctx.strokeStyle = alive ? (nodeColor(b)+'55') : '#30363d';
+    ctx.lineWidth   = alive ? 1.5 : 0.5;
+    ctx.setLineDash(alive ? [] : [3,3]);
     ctx.stroke();
   });
   ctx.setLineDash([]);
 
-  // draw nodes
-  Object.entries(P).forEach(([k,p])=>{
-    const isLeaf=k.startsWith('S');
-    const alive=DOG[k]?.alive!==false;
-    const r=k==='root'?16:isLeaf?12:13;
-    const col=alive?(NODE_COL[k]||'#9FE1CB'):'#30363d';
-    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
-    ctx.fillStyle=col+'20';ctx.fill();
-    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
-    ctx.fillStyle=col;
-    ctx.font=`${isLeaf?9:10}px monospace`;
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(k,p.x,p.y);
-    ctx.fillStyle='#8b949e';ctx.font='8px monospace';
-    ctx.fillText('r'+(DOG[k]?.rank||'?'),p.x,p.y+r+8);
+  // ── data pulses ──
+  for(let i = pulses.length-1; i >= 0; i--){
+    const p = pulses[i];
+    p.progress += 2.5; // speed
+    if(p.progress >= PULSE_MAX){ pulses.splice(i,1); continue; }
+
+    const [a, b] = p.edge;
+    if(!P[a] || !P[b]) continue;
+    const t  = p.progress / PULSE_MAX;
+    const px = P[a].x + (P[b].x - P[a].x) * t;
+    const py = P[a].y + (P[b].y - P[a].y) * t;
+    const alpha = 1 - t;
+
+    // glow
+    ctx.beginPath();
+    ctx.arc(px, py, 5, 0, Math.PI*2);
+    ctx.fillStyle = p.color + Math.round(alpha*80).toString(16).padStart(2,'0');
+    ctx.fill();
+    // core dot
+    ctx.beginPath();
+    ctx.arc(px, py, 2.5, 0, Math.PI*2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = alpha;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // ── nodes ──
+  Object.entries(P).forEach(([k, pos]) => {
+    const isLeaf  = k.startsWith('S');
+    const alive   = DOG[k]?.alive !== false;
+    const r       = k === 'root' ? 16 : isLeaf ? 12 : 13;
+    const col     = nodeColor(k);
+    const breach  = isLeaf && nodeData[k]?.breach;
+
+    // animated breach pulse ring
+    if(breach){
+      const wave = ((animFrame % 40) / 40);
+      const wr   = r + 4 + wave * 8;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, wr, 0, Math.PI*2);
+      ctx.strokeStyle = '#f85149';
+      ctx.lineWidth   = 1.5;
+      ctx.globalAlpha = (1 - wave) * 0.6;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    // fill
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, r, 0, Math.PI*2);
+    ctx.fillStyle   = col+'22';
+    ctx.fill();
+    ctx.strokeStyle = col;
+    ctx.lineWidth   = breach ? 2 : 1.5;
+    ctx.stroke();
+
+    // label
+    ctx.fillStyle      = col;
+    ctx.font           = `${isLeaf?9:10}px monospace`;
+    ctx.textAlign      = 'center';
+    ctx.textBaseline   = 'middle';
+    ctx.fillText(k, pos.x, pos.y);
+
+    // rank
+    ctx.fillStyle    = '#8b949e';
+    ctx.font         = '8px monospace';
+    ctx.fillText('r'+(DOG[k]?.rank||'?'), pos.x, pos.y+r+8);
   });
 }
 
-// ── TEMP HISTORY CHART ──
-function drawChart(){
-  const cv=document.getElementById('tempChart');
-  if(!cv||s6Hist.length<2)return;
-  const ctx=cv.getContext('2d');
-  const W=cv.clientWidth||400,H=cv.clientHeight||200;
-  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
-  ctx.scale(devicePixelRatio,devicePixelRatio);
-  const pad={l:34,r:8,t:8,b:22};
-  const iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
+// ════════════════════════════════════════
+//  CHARTS
+// ════════════════════════════════════════
+function switchChart(type){
+  activeChart = type;
+  document.getElementById('tempChart').style.display = type==='temp'?'block':'none';
+  document.getElementById('humChart').style.display  = type==='hum' ?'block':'none';
+  document.getElementById('tabTemp').className = 'chart-tab'+(type==='temp'?' active':'');
+  document.getElementById('tabHum').className  = 'chart-tab'+(type==='hum' ?' active':'');
+  drawChart();
+}
 
-  const lo=0,hi=14;
-  const toX=i=>pad.l+(i/(maxHist-1))*iw;
-  const toY=v=>pad.t+ih-((v-lo)/(hi-lo))*ih;
+function drawLineChart(cv, hist, lo, hi, threshLo, threshHi, color, unit){
+  if(!cv || hist.length < 2) return;
+  const ctx = cv.getContext('2d');
+  const W   = cv.clientWidth  || 400;
+  const H   = cv.clientHeight || 200;
+  cv.width  = W * devicePixelRatio;
+  cv.height = H * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
 
-  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  const pad = {l:36, r:10, t:10, b:22};
+  const iw  = W - pad.l - pad.r;
+  const ih  = H - pad.t - pad.b;
+  const toX = i => pad.l + (i / (hist.length-1)) * iw;
+  const toY = v => pad.t + ih - ((v-lo)/(hi-lo)) * ih;
+
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, W, H);
 
   // safe band
-  ctx.fillStyle='rgba(88,164,255,.07)';
-  ctx.fillRect(pad.l,toY(8),iw,toY(2)-toY(8));
+  ctx.fillStyle = 'rgba(88,166,255,.07)';
+  ctx.fillRect(pad.l, toY(threshHi), iw, toY(threshLo)-toY(threshHi));
 
   // threshold lines
-  [2,8].forEach(v=>{
-    ctx.beginPath();ctx.moveTo(pad.l,toY(v));ctx.lineTo(pad.l+iw,toY(v));
-    ctx.strokeStyle='#d2992250';ctx.lineWidth=.5;ctx.setLineDash([4,3]);ctx.stroke();
+  [threshLo, threshHi].forEach(v => {
+    ctx.beginPath();
+    ctx.moveTo(pad.l, toY(v)); ctx.lineTo(pad.l+iw, toY(v));
+    ctx.strokeStyle = color+'55'; ctx.lineWidth=0.5; ctx.setLineDash([4,3]); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle='#d29922';ctx.font='9px monospace';ctx.textAlign='right';
-    ctx.fillText(v+'°',pad.l-3,toY(v)+3);
+    ctx.fillStyle = color; ctx.font='9px monospace'; ctx.textAlign='right';
+    ctx.fillText(v+unit, pad.l-3, toY(v)+3);
   });
 
-  // axis
-  ctx.fillStyle='#8b949e';ctx.font='9px monospace';ctx.textAlign='center';
-  ctx.fillText('oldest',pad.l,H-5);
-  ctx.fillText('now',pad.l+iw,H-5);
+  // axis labels
+  ctx.fillStyle='#8b949e'; ctx.font='9px monospace'; ctx.textAlign='center';
+  ctx.fillText('oldest', pad.l, H-5);
+  ctx.fillText('now', pad.l+iw, H-5);
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t+ih);
+  grad.addColorStop(0, color+'35');
+  grad.addColorStop(1, color+'05');
+  ctx.beginPath();
+  hist.forEach((v,i)=>{ const x=toX(i),y=toY(v); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.lineTo(toX(hist.length-1), pad.t+ih);
+  ctx.lineTo(toX(0), pad.t+ih);
+  ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
 
   // line
   ctx.beginPath();
-  s6Hist.forEach((v,i)=>{const x=toX(i),y=toY(v);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-  ctx.strokeStyle='#d29922';ctx.lineWidth=1.5;ctx.stroke();
+  hist.forEach((v,i)=>{ const x=toX(i),y=toY(v); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.strokeStyle = color; ctx.lineWidth=1.5; ctx.stroke();
 
   // breach dots
-  s6Hist.forEach((v,i)=>{
-    if(v>8||v<2){
-      ctx.beginPath();ctx.arc(toX(i),toY(v),3,0,Math.PI*2);
-      ctx.fillStyle='#f85149';ctx.fill();
+  hist.forEach((v,i)=>{
+    if(v>threshHi || v<threshLo){
+      ctx.beginPath(); ctx.arc(toX(i), toY(v), 3, 0, Math.PI*2);
+      ctx.fillStyle='#f85149'; ctx.fill();
     }
   });
+
+  // current value
+  const last = hist[hist.length-1];
+  ctx.fillStyle=color; ctx.font='bold 11px monospace'; ctx.textAlign='right';
+  ctx.fillText(last.toFixed(1)+unit, pad.l+iw, pad.t+12);
 }
 
-// ── MQTT LOG ──
-function ts(){
-  const d=new Date();
-  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
-}
-
-function logMsg(type,topic,payload){
-  msgTotal++;
-  document.getElementById('mcnt').textContent=msgTotal+' msgs';
-  const log=document.getElementById('mqttLog');
-  const tc=type==='alert-r'?'tc-red':type==='ctrl-r'?'tc-purple':type==='lwt-r'?'tc-amber':'tc-blue';
-  const d=document.createElement('div');
-  d.className='lr '+type;
-  d.innerHTML=`<span class="ltime">${ts()}</span><span class="ltopic ${tc}">${topic}</span><span class="lpayload">${payload.substring(0,55)}</span>`;
-  log.appendChild(d);
-  if(log.children.length>400)log.removeChild(log.firstChild);
-  log.scrollTop=log.scrollHeight;
-}
-
-function addAlert(type,text){
-  const log=document.getElementById('alertLog');
-  const badge=type==='breach'?'<span class="ab ab-b">BREACH</span>':
-               type==='recover'?'<span class="ab ab-r">RECOVER</span>':
-               '<span class="ab ab-l">LWT</span>';
-  const d=document.createElement('div');
-  d.className='alert-row';
-  d.innerHTML=`${badge}<span>${text}</span><span class="atime">${ts()}</span>`;
-  log.prepend(d);
-  if(log.children.length>40)log.removeChild(log.lastChild);
-}
-
-// ── MQTT ──
-function connectBroker(){
-  const id='dash_'+Math.random().toString(36).substr(2,9);
-  client=new Paho.MQTT.Client(BROKER_HOST,BROKER_PORT,id);
-
-  client.onConnectionLost=function(){
-    document.getElementById('brokerPill').textContent='BROKER: RECONNECTING…';
-    document.getElementById('brokerPill').className='broker-pill connecting';
-    setTimeout(connectBroker,3000);
-  };
-
-  client.onMessageArrived=function(msg){
-    const topic=msg.destinationName;
-    const payload=msg.payloadString;
-
-    let type='pub';
-    if(topic.includes('alerts/breach'))   type='alert-r';
-    else if(topic.includes('alerts/recover')) type='alert-r';
-    else if(topic.includes('control'))    type='ctrl-r';
-    else if(topic.includes('status')&&payload==='offline') type='lwt-r';
-
-    logMsg(type,topic,payload);
-
-    // temperature
-    if(topic.includes('/temperature')){
-      try{
-        const d=JSON.parse(payload);
-        const nid=d.node;
-        if(!nid)return;
-        const zone='zone'+NODE_ZONE[nid];
-        const cfg=THRESHOLDS[zone];
-        const breach=cfg&&(d.temp>cfg.hi||d.temp<cfg.lo);
-        updateNode(nid,d.temp,d.hum,breach);
-        if(nid==='S6'){s6Hist.push(d.temp);if(s6Hist.length>maxHist)s6Hist.shift();}
-        tick++;
-        document.getElementById('tickPill').textContent='tick: '+tick;
-      }catch(e){}
-    }
-
-    // status
-    if(topic.includes('/status')){
-      const parts=topic.split('/');
-      const nid=parts[2];
-      if(payload==='offline'&&DOG[nid]){markDead(nid);addAlert('lwt',nid+' offline — LWT published');}
-      else if(payload==='online'&&DOG[nid]){markAlive(nid);}
-    }
-
-    // alerts
-    if(topic.includes('alerts/breach')){
-      try{const d=JSON.parse(payload);addAlert('breach',`${d.node} ${d.zone} ${d.temp}°C [${d.type||''}]`);}catch(e){}
-    }
-    if(topic.includes('alerts/recover')){
-      try{const d=JSON.parse(payload);addAlert('recover',`${d.zone} back in range after ${d.duration_s}s`);}catch(e){}
-    }
-  };
-
-  const opts={
-    onSuccess:function(){
-      document.getElementById('brokerPill').textContent='BROKER: ONLINE';
-      document.getElementById('brokerPill').className='broker-pill';
-      client.subscribe('coldchain/#',{qos:0});
-      logMsg('sys-r','system','Connected to broker.hivemq.com — subscribed coldchain/#');
-    },
-    onFailure:function(e){
-      document.getElementById('brokerPill').textContent='BROKER: FAILED ('+e.errorMessage+')';
-      document.getElementById('brokerPill').className='broker-pill off';
-      setTimeout(connectBroker,4000);
-    },
-    keepAliveInterval:30,
-    cleanSession:true,
-    useSSL:true,   // FIXED: required for HTTPS-hosted pages
-  };
-
-  try{client.connect(opts);}
-  catch(e){
-    document.getElementById('brokerPill').textContent='BROKER: ERROR';
-    document.getElementById('brokerPill').className='broker-pill off';
-    setTimeout(connectBroker,4000);
+function drawChart(){
+  const s6 = nodeData['S6'];
+  if(activeChart === 'temp'){
+    drawLineChart(document.getElementById('tempChart'), s6.tempHist, 0, 14, 2, 8, '#d29922', '°');
+  } else {
+    drawLineChart(document.getElementById('humChart'),  s6.humHist,  20, 100, 40, 80, '#58a6ff', '%');
   }
 }
 
-// ── CONTROLS ──
+// ════════════════════════════════════════
+//  MQTT LOG
+// ════════════════════════════════════════
+function ts(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+}
+
+function logMsg(type, topic, payload){
+  msgTotal++;
+  document.getElementById('mcnt').textContent = msgTotal+' msgs';
+  const log = document.getElementById('mqttLog');
+  const tc  = type==='alert-r'?'tc-red':type==='ctrl-r'?'tc-purple':type==='lwt-r'?'tc-amber':'tc-blue';
+  const d   = document.createElement('div');
+  d.className = 'lr '+type;
+  d.innerHTML = `<span class="ltime">${ts()}</span><span class="ltopic ${tc}">${topic}</span><span class="lpayload">${payload.substring(0,50)}</span>`;
+  log.appendChild(d);
+  if(log.children.length > 400) log.removeChild(log.firstChild);
+  log.scrollTop = log.scrollHeight;
+}
+
+function addAlert(type, text){
+  const log   = document.getElementById('alertLog');
+  const badge = type==='breach'  ? '<span class="ab ab-b">BREACH</span>'  :
+                type==='recover' ? '<span class="ab ab-r">RECOVER</span>' :
+                                   '<span class="ab ab-l">LWT</span>';
+  const d = document.createElement('div');
+  d.className = 'alert-row';
+  d.innerHTML = `${badge}<span>${text}</span><span class="atime">${ts()}</span>`;
+  log.prepend(d);
+  if(log.children.length > 40) log.removeChild(log.lastChild);
+}
+
+// ════════════════════════════════════════
+//  MQTT
+// ════════════════════════════════════════
+function connectBroker(){
+  const id = 'dash_'+Math.random().toString(36).substr(2,9);
+  client = new Paho.MQTT.Client(BROKER_HOST, BROKER_PORT, id);
+
+  client.onConnectionLost = function(){
+    document.getElementById('brokerPill').textContent = 'BROKER: RECONNECTING…';
+    document.getElementById('brokerPill').className   = 'broker-pill connecting';
+    setTimeout(connectBroker, 3000);
+  };
+
+  client.onMessageArrived = function(msg){
+    const topic   = msg.destinationName;
+    const payload = msg.payloadString;
+
+    let type = 'pub';
+    if(topic.includes('alerts/breach'))          type = 'alert-r';
+    else if(topic.includes('alerts/recover'))    type = 'alert-r';
+    else if(topic.includes('control'))           type = 'ctrl-r';
+    else if(topic.includes('status') && payload==='offline') type = 'lwt-r';
+
+    logMsg(type, topic, payload);
+
+    if(topic.includes('/temperature')){
+      try{
+        const d    = JSON.parse(payload);
+        const nid  = d.node;
+        if(!nid) return;
+        const zone = 'zone'+NODE_ZONE[nid];
+        const cfg  = THRESHOLDS[zone];
+        const breach = cfg && (d.temp > cfg.hi || d.temp < cfg.lo);
+        updateNode(nid, d.temp, d.hum, breach);
+        tick++;
+        document.getElementById('tickPill').textContent = 'tick: '+tick;
+      } catch(e){}
+    }
+
+    if(topic.includes('/status')){
+      const parts = topic.split('/');
+      const nid   = parts[2];
+      if(payload==='offline' && DOG[nid]){ markDead(nid);  addAlert('lwt',  nid+' offline — LWT published'); }
+      else if(payload==='online' && DOG[nid]){ markAlive(nid); }
+    }
+
+    if(topic.includes('alerts/breach')){
+      try{ const d=JSON.parse(payload); addAlert('breach',`${d.node} ${d.zone} ${d.temp}°C [${d.type||''}]`); }catch(e){}
+    }
+    if(topic.includes('alerts/recover')){
+      try{ const d=JSON.parse(payload); addAlert('recover',`${d.zone} back in range after ${d.duration_s}s`); }catch(e){}
+    }
+  };
+
+  client.connect({
+    onSuccess(){
+      document.getElementById('brokerPill').textContent = 'BROKER: ONLINE';
+      document.getElementById('brokerPill').className   = 'broker-pill';
+      client.subscribe('coldchain/#', {qos:0});
+      logMsg('sys-r','system','Connected to broker.hivemq.com — subscribed coldchain/#');
+    },
+    onFailure(e){
+      document.getElementById('brokerPill').textContent = 'BROKER: FAILED ('+e.errorMessage+')';
+      document.getElementById('brokerPill').className   = 'broker-pill off';
+      setTimeout(connectBroker, 4000);
+    },
+    keepAliveInterval: 30,
+    cleanSession:      true,
+    useSSL:            true,
+  });
+}
+
+// ════════════════════════════════════════
+//  CONTROLS
+// ════════════════════════════════════════
 function toggleNode(nid){
-  if(!client||!client.isConnected())return;
+  if(!client || !client.isConnected()) return;
   if(DOG[nid].alive){
-    const m=new Paho.MQTT.Message('offline');
-    m.destinationName='coldchain/zone'+NODE_ZONE[nid]+'/'+nid+'/status';
-    m.retained=true;m.qos=1;client.send(m);
-    markDead(nid);addAlert('lwt',nid+' manually killed');
+    const m = new Paho.MQTT.Message('offline');
+    m.destinationName = 'coldchain/zone'+NODE_ZONE[nid]+'/'+nid+'/status';
+    m.retained=true; m.qos=1; client.send(m);
+    markDead(nid); addAlert('lwt', nid+' manually killed');
   } else {
-    DOG[nid].alive=true;
-    const m=new Paho.MQTT.Message('online');
-    m.destinationName='coldchain/zone'+NODE_ZONE[nid]+'/'+nid+'/status';
-    m.retained=true;m.qos=1;client.send(m);
-    markAlive(nid);addAlert('recover',nid+' revived — rejoined DODAG');
+    DOG[nid].alive = true;
+    const m = new Paho.MQTT.Message('online');
+    m.destinationName = 'coldchain/zone'+NODE_ZONE[nid]+'/'+nid+'/status';
+    m.retained=true; m.qos=1; client.send(m);
+    markAlive(nid); addAlert('recover', nid+' revived — rejoined DODAG');
   }
 }
 
 function triggerBreach(){
-  if(!client||!client.isConnected())return;
-  const a=JSON.stringify({node:'S6',zone:'zoneC',temp:14.0,type:'COOLING',range:[2,8],optimum:5,ts:Date.now()});
-  const m=new Paho.MQTT.Message(a);
-  m.destinationName='coldchain/alerts/breach';m.qos=1;client.send(m);
+  if(!client || !client.isConnected()) return;
+  const a = JSON.stringify({node:'S6',zone:'zoneC',temp:14.0,type:'COOLING',range:[2,8],optimum:5,ts:Date.now()});
+  const m = new Paho.MQTT.Message(a);
+  m.destinationName='coldchain/alerts/breach'; m.qos=1; client.send(m);
   addAlert('breach','S6 manual trigger +14°C');
 }
 
 function healAll(){
-  ['S1','S2','S3','S4','S5','S6'].forEach(n=>{if(!DOG[n].alive)toggleNode(n);});
+  ['S1','S2','S3','S4','S5','S6'].forEach(n=>{ if(!DOG[n].alive) toggleNode(n); });
 }
 
 function killRandom(){
-  const a=Object.keys(DOG).filter(k=>k.startsWith('S')&&DOG[k].alive);
-  if(a.length)toggleNode(a[Math.floor(Math.random()*a.length)]);
+  const a = Object.keys(DOG).filter(k=>k.startsWith('S')&&DOG[k].alive);
+  if(a.length) toggleNode(a[Math.floor(Math.random()*a.length)]);
 }
 
 function clearLog(){
   document.getElementById('mqttLog').innerHTML='';
-  msgTotal=0;document.getElementById('mcnt').textContent='0 msgs';
+  msgTotal=0; document.getElementById('mcnt').textContent='0 msgs';
 }
 
-// ── BOOT ──
+// ════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════
 buildZones();
-drawDodag();
+buildStats();
 connectBroker();
-setInterval(()=>{drawDodag();drawChart();},2000);
-window.addEventListener('resize',()=>{drawDodag();drawChart();});
+animateDodag();                                      // starts rAF loop
+setInterval(()=>{ drawChart(); updateAges(); }, 2000);
+window.addEventListener('resize', drawChart);
 </script>
 </body>
 </html>
