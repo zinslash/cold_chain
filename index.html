@@ -34,7 +34,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .ctrl.red:hover{border-color:var(--red);color:var(--red);}
 .ctrl.grn:hover{border-color:var(--teal);color:var(--teal);}
 
-.main{flex:1;display:grid;grid-template-columns:270px 1fr 220px 270px;grid-template-rows:1fr 1fr;gap:0;overflow:hidden;}
+.main{flex:1;display:grid;grid-template-columns:260px 1fr 200px 180px 260px;grid-template-rows:1fr 1fr;gap:0;overflow:hidden;}
 
 .panel{border-right:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;}
 .panel-head{padding:9px 14px 7px;border-bottom:1px solid var(--border);font-size:10px;font-weight:500;letter-spacing:.08em;color:var(--text2);text-transform:uppercase;flex-shrink:0;display:flex;align-items:center;gap:6px;}
@@ -128,36 +128,36 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="panel-body" id="zonesContainer"></div>
   </div>
 
-  <!-- col 2 row 1: DODAG animated canvas -->
-  <div class="panel" style="grid-row:1/2;">
+  <!-- col 2: DODAG — full height both rows -->
+  <div class="panel" style="grid-column:2/3;grid-row:1/3;">
     <div class="panel-head">DODAG topology — live</div>
     <canvas id="dogCanvas" style="flex:1;width:100%;display:block;"></canvas>
   </div>
 
-  <!-- col 2 row 2: chart tabs -->
-  <div class="panel" style="grid-row:2/3;display:flex;flex-direction:column;">
+  <!-- col 3: chart tabs — full height -->
+  <div class="panel" style="grid-column:3/4;grid-row:1/3;display:flex;flex-direction:column;">
     <div style="display:flex;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0;">
-      <button class="chart-tab active" id="tabTemp" onclick="switchChart('temp')">🌡 S6 Temp</button>
-      <button class="chart-tab" id="tabHum" onclick="switchChart('hum')">💧 S6 Humidity</button>
+      <button class="chart-tab active" id="tabTemp" onclick="switchChart('temp')">🌡 Temp</button>
+      <button class="chart-tab" id="tabHum" onclick="switchChart('hum')">💧 Hum</button>
     </div>
     <canvas id="tempChart" style="flex:1;width:100%;display:block;"></canvas>
     <canvas id="humChart"  style="flex:1;width:100%;display:none;"></canvas>
   </div>
 
-  <!-- col 3: stats -->
-  <div class="panel" style="grid-row:1/3;">
-    <div class="panel-head">Zone stats — min / avg / max</div>
+  <!-- col 4: stats — full height -->
+  <div class="panel" style="grid-column:4/5;grid-row:1/3;">
+    <div class="panel-head">Stats</div>
     <div class="panel-body" id="statsContainer"></div>
   </div>
 
-  <!-- col 4 row 1: MQTT log -->
-  <div class="panel" style="grid-row:1/2;border-right:none;">
+  <!-- col 5 row 1: MQTT log -->
+  <div class="panel" style="grid-column:5/6;grid-row:1/2;border-right:none;">
     <div class="panel-head">MQTT log <span class="mcnt" id="mcnt">0 msgs</span></div>
     <div class="mqtt-log" id="mqttLog"></div>
   </div>
 
-  <!-- col 4 row 2: alerts -->
-  <div class="panel" style="grid-row:2/3;border-right:none;">
+  <!-- col 5 row 2: alerts -->
+  <div class="panel" style="grid-column:5/6;grid-row:2/3;border-right:none;">
     <div class="panel-head">Alert events</div>
     <div class="alert-log" id="alertLog"></div>
   </div>
@@ -440,8 +440,8 @@ function animateDodag(){
     ctx.beginPath();
     ctx.moveTo(P[a].x, P[a].y);
     ctx.lineTo(P[b].x, P[b].y);
-    ctx.strokeStyle = alive ? (nodeColor(b)+'55') : '#30363d';
-    ctx.lineWidth   = alive ? 1.5 : 0.5;
+    ctx.strokeStyle = alive ? (nodeColor(b)+'66') : '#30363d';
+    ctx.lineWidth   = alive ? 2 : 0.8;
     ctx.setLineDash(alive ? [] : [3,3]);
     ctx.stroke();
   });
@@ -462,12 +462,12 @@ function animateDodag(){
 
     // glow
     ctx.beginPath();
-    ctx.arc(px, py, 5, 0, Math.PI*2);
+    ctx.arc(px, py, 8, 0, Math.PI*2);
     ctx.fillStyle = p.color + Math.round(alpha*80).toString(16).padStart(2,'0');
     ctx.fill();
     // core dot
     ctx.beginPath();
-    ctx.arc(px, py, 2.5, 0, Math.PI*2);
+    ctx.arc(px, py, 4, 0, Math.PI*2);
     ctx.fillStyle = p.color;
     ctx.globalAlpha = alpha;
     ctx.fill();
@@ -477,44 +477,52 @@ function animateDodag(){
   // ── nodes ──
   Object.entries(P).forEach(([k, pos]) => {
     const isLeaf  = k.startsWith('S');
+    const isRoot  = k === 'root';
     const alive   = DOG[k]?.alive !== false;
-    const r       = k === 'root' ? 16 : isLeaf ? 12 : 13;
+    const r       = isRoot ? 26 : isLeaf ? 20 : 22;
     const col     = nodeColor(k);
     const breach  = isLeaf && nodeData[k]?.breach;
 
     // animated breach pulse ring
     if(breach){
       const wave = ((animFrame % 40) / 40);
-      const wr   = r + 4 + wave * 8;
+      const wr   = r + 6 + wave * 12;
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, wr, 0, Math.PI*2);
       ctx.strokeStyle = '#f85149';
-      ctx.lineWidth   = 1.5;
+      ctx.lineWidth   = 2;
       ctx.globalAlpha = (1 - wave) * 0.6;
       ctx.stroke();
       ctx.globalAlpha = 1;
     }
 
+    // shadow glow for alive nodes
+    if(alive){
+      ctx.shadowColor = col;
+      ctx.shadowBlur  = breach ? 14 : 6;
+    }
+
     // fill
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, r, 0, Math.PI*2);
-    ctx.fillStyle   = col+'22';
+    ctx.fillStyle   = col+'28';
     ctx.fill();
     ctx.strokeStyle = col;
-    ctx.lineWidth   = breach ? 2 : 1.5;
+    ctx.lineWidth   = breach ? 2.5 : 1.8;
     ctx.stroke();
+    ctx.shadowBlur  = 0;
 
     // label
     ctx.fillStyle      = col;
-    ctx.font           = `${isLeaf?9:10}px monospace`;
+    ctx.font           = `bold ${isLeaf?12:13}px monospace`;
     ctx.textAlign      = 'center';
     ctx.textBaseline   = 'middle';
     ctx.fillText(k, pos.x, pos.y);
 
-    // rank
+    // rank badge below node
     ctx.fillStyle    = '#8b949e';
-    ctx.font         = '8px monospace';
-    ctx.fillText('r'+(DOG[k]?.rank||'?'), pos.x, pos.y+r+8);
+    ctx.font         = '10px monospace';
+    ctx.fillText('rank '+(DOG[k]?.rank||'?'), pos.x, pos.y+r+12);
   });
 }
 
