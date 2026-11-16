@@ -1,3 +1,4 @@
+```
 
 <!DOCTYPE html>
 <html lang="en">
@@ -2126,9 +2127,12 @@ function renderS1Control() {
     s1Control.pending &&
     Date.now()-s1Control.pending.at > 12000
   ) {
+    const echoed = s1Control.pending.echoed;
+    console.warn("[S1] Command confirmation timed out", s1Control.pending);
     s1Control.pending = null;
-    s1Control.feedback =
-      "No confirmation from Wokwi. Check the command topic and ESP32 firmware.";
+    s1Control.feedback = echoed
+      ? "Broker received your command, but no matching ESP32 confirmation arrived. Check Wokwi subscription and Serial Monitor."
+      : "No command echo or ESP32 confirmation. Check MQTT subscription, broker, and the browser Console.";
     s1Control.feedbackKind = "issue";
   }
 
@@ -2215,14 +2219,16 @@ function sendS1Command(mode,target) {
   message.retained = false;
 
   try {
+    s1Control.pending = {
+      id:requestId,
+      at:Date.now(),
+      echoed:false
+    };
     client.send(message);
+    console.log("[S1] Command published:", S1_COMMAND_TOPIC, command);
 
     s1Control.mode = mode;
     s1Control.target = target;
-    s1Control.pending = {
-      id:requestId,
-      at:Date.now()
-    };
     s1Control.feedback = "";
     s1Control.feedbackKind = "";
 
@@ -2335,11 +2341,12 @@ function onS1ControllerData(data,isAcknowledgement) {
         "Wokwi rejected the temperature command.";
       s1Control.feedbackKind = "issue";
     } else {
+      const shownTarget = Number.isFinite(s1Control.activeTarget)
+        ? s1Control.activeTarget.toFixed(1) + "°C"
+        : "unknown";
       s1Control.feedback =
-        "✓ Wokwi confirmed "+s1Control.deviceMode+
-        " mode. Target: "+
-        s1Control.activeTarget.toFixed(1)+"°C";
-
+        "✓ Wokwi confirmed " + (s1Control.deviceMode || "control") +
+        " mode. Target: " + shownTarget;
       s1Control.feedbackKind = "success";
     }
   }
@@ -2374,6 +2381,22 @@ function connectBroker() {
     const topic = msg.destinationName;
     const payload = msg.payloadString;
 
+    if (topic === S1_COMMAND_TOPIC || topic === S1_STATE_TOPIC) {
+      console.log("[S1] MQTT received:", topic, payload);
+    }
+    if (topic === S1_COMMAND_TOPIC) {
+      try {
+        const commandEcho = JSON.parse(payload);
+        if (s1Control.pending &&
+            commandEcho.request_id === s1Control.pending.id) {
+          s1Control.pending.echoed = true;
+          console.log("[S1] Broker echoed matching command");
+        }
+      } catch (error) {
+        console.warn("[S1] Invalid echoed command:", error);
+      }
+    }
+
     let type = "pub";
 
     if (topic.includes("alerts/breach"))
@@ -2395,6 +2418,11 @@ function connectBroker() {
     if (topic === S1_STATE_TOPIC) {
       try {
         const data = JSON.parse(payload);
+        if (s1Control.pending &&
+            data.request_id !== s1Control.pending.id) {
+          console.log("[S1] State received, no matching request_id:",
+            data.request_id || "(periodic state)");
+        }
         onS1ControllerData(data,true);
       } catch(error) {
         console.error("Invalid controller state",error);
@@ -2438,7 +2466,14 @@ function connectBroker() {
           "tick: "+tick;
 
         if (nid === "S1") {
-          onS1ControllerData(data,false);
+          const hasResponseId =
+            typeof data.request_id === "string" &&
+            data.request_id.length > 0 &&
+            data.controller === true;
+          if (hasResponseId) {
+            console.log("[S1] Telemetry acknowledgement:", data.request_id);
+          }
+          onS1ControllerData(data,hasResponseId);
         }
 
       } catch(error) {
@@ -2507,13 +2542,31 @@ function connectBroker() {
       document.getElementById("brokerPill").className =
         "broker-pill";
 
-      client.subscribe("coldchain/#",{qos:0});
+      client.subscribe("coldchain/#", {
+        qos:0,
+        onSuccess() {
+          console.log("[MQTT] coldchain/# subscription confirmed");
+        },
+        onFailure(error) {
+          console.error("[MQTT] coldchain/# subscription failed", error);
+        }
+      });
 
-      logMsg(
-        "sys-r",
-        "system",
-        "Connected — subscribed coldchain/#"
-      );
+      client.subscribe(S1_STATE_TOPIC, {
+        qos:1,
+        onSuccess() {
+          console.log("[S1] Controller-state subscription confirmed");
+          logMsg("sys-r", "system", "S1 controller state subscription confirmed");
+        },
+        onFailure(error) {
+          console.error("[S1] Controller-state subscription failed", error);
+          s1Control.feedback = "Could not subscribe to S1 state topic.";
+          s1Control.feedbackKind = "issue";
+          renderS1Control();
+        }
+      });
+
+      logMsg("sys-r", "system", "Connected — subscribing coldchain/#");
 
       renderS1Control();
     },
