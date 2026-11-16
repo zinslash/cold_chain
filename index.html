@@ -6,585 +6,540 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ColdChain | Live Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg: #f0f2f5;
-  --card: #fff;
-  --light: #f7f8fa;
-  --border: #e8eaee;
-  --text: #1a1d23;
-  --muted: #7a8494;
-  --blue: #2563eb;
-  --cyan: #0891b2;
-  --orange: #d97706;
-  --green: #16a34a;
-  --red: #dc2626;
-  --shadow: 0 2px 15px #11182711;
+  --bg:#f0f2f5;
+  --card:#fff;
+  --light:#f7f8fa;
+  --border:#e8eaee;
+  --text:#1a1d23;
+  --muted:#7a8494;
+  --blue:#2563eb;
+  --cyan:#0891b2;
+  --orange:#d97706;
+  --green:#16a34a;
+  --red:#dc2626;
+  --shadow:0 2px 15px #11182711;
 }
 
-* {
-  box-sizing: border-box;
-}
+* {box-sizing:border-box}
 
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font: 13px Inter, Arial, sans-serif;
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:13px Inter,Arial,sans-serif;
 }
 
-button, input {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
+button,input {font:inherit}
+button {cursor:pointer}
 
 nav {
-  background: white;
-  border-bottom: 1px solid var(--border);
-  height: 62px;
-  display: flex;
-  align-items: center;
-  padding: 0 25px;
-  gap: 30px;
-  position: sticky;
-  top: 0;
-  z-index: 5;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  height:62px;
+  display:flex;
+  align-items:center;
+  padding:0 25px;
+  gap:30px;
+  position:sticky;
+  top:0;
+  z-index:5;
 }
 
 .logo {
-  font-size: 18px;
-  font-weight: 700;
-  white-space: nowrap;
+  font-size:18px;
+  font-weight:700;
+  white-space:nowrap;
 }
 
 .logo i {
-  font-style: normal;
-  background: var(--blue);
-  color: white;
-  padding: 8px;
-  border-radius: 8px;
-  margin-right: 9px;
+  font-style:normal;
+  background:var(--blue);
+  color:#fff;
+  padding:8px;
+  border-radius:8px;
+  margin-right:9px;
 }
 
 .navlinks {
-  display: flex;
-  gap: 25px;
-  color: var(--muted);
+  display:flex;
+  gap:25px;
+  color:var(--muted);
 }
 
 .navlinks strong {
-  color: var(--blue);
-  height: 62px;
-  display: flex;
-  align-items: center;
-  border-bottom: 2px solid var(--blue);
+  color:var(--blue);
+  height:62px;
+  display:flex;
+  align-items:center;
+  border-bottom:2px solid var(--blue);
 }
 
 .navright {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 11px;
-  color: var(--muted);
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:11px;
+  color:var(--muted);
 }
 
 .pill {
-  background: #fff7e4;
-  color: #a66d07;
-  padding: 6px 11px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 10px;
+  background:#fff7e4;
+  color:#a66d07;
+  padding:6px 11px;
+  border-radius:20px;
+  font-weight:700;
+  font-size:10px;
 }
 
 .pill.good {
-  background: #e9f9ee;
-  color: var(--green);
+  background:#e9f9ee;
+  color:var(--green);
 }
 
 .pill.bad {
-  background: #feecec;
-  color: var(--red);
+  background:#feecec;
+  color:var(--red);
 }
 
 main {
-  max-width: 1200px;
-  margin: auto;
-  padding: 28px 20px 60px;
+  max-width:1200px;
+  margin:auto;
+  padding:28px 20px 60px;
 }
 
 h2 {
-  font-size: 18px;
-  margin: 0 0 16px;
+  font-size:18px;
+  margin:0 0 16px;
 }
 
 h2 small {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--muted);
-  margin-left: 7px;
+  font-size:12px;
+  font-weight:400;
+  color:var(--muted);
+  margin-left:7px;
 }
 
-.stats, .zones {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 26px;
+.stats,.zones {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:26px;
 }
 
 .card {
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: var(--shadow);
+  background:#fff;
+  padding:20px;
+  border-radius:16px;
+  box-shadow:var(--shadow);
 }
 
 .stat-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
 
 .stat-count {
-  font-size: 38px;
-  font-weight: 300;
+  font-size:38px;
+  font-weight:300;
 }
 
 .stat-track {
-  height: 5px;
-  background: #edf0f3;
-  border-radius: 6px;
-  margin: 20px 0 5px;
+  height:5px;
+  background:#edf0f3;
+  border-radius:6px;
+  margin:20px 0 5px;
 }
 
 .stat-track div {
-  height: 100%;
-  border-radius: 6px;
-  transition: width .3s;
+  height:100%;
+  border-radius:6px;
+  transition:width .3s;
 }
 
 .muted {
-  color: var(--muted);
-  font-size: 11px;
+  color:var(--muted);
+  font-size:11px;
 }
 
 .banner {
-  background: linear-gradient(115deg, #1e53cf, #0897b5);
-  border-radius: 16px;
-  color: white;
-  display: grid;
-  grid-template-columns: 265px 1fr;
-  margin-bottom: 24px;
-  min-height: 240px;
-  overflow: hidden;
+  background:linear-gradient(115deg,#1e53cf,#0897b5);
+  border-radius:16px;
+  color:#fff;
+  display:grid;
+  grid-template-columns:265px 1fr;
+  margin-bottom:24px;
+  min-height:240px;
+  overflow:hidden;
 }
 
-.banner-info {
-  padding: 34px;
-}
+.banner-info {padding:34px}
 
 .banner-temp {
-  font-size: 68px;
-  font-weight: 300;
-  line-height: 1.35;
+  font-size:68px;
+  font-weight:300;
+  line-height:1.35;
 }
 
 .banner-info small {
-  font-size: 11px;
-  opacity: .75;
+  font-size:11px;
+  opacity:.75;
 }
 
 #overviewCanvas {
-  width: 100%;
-  height: 240px;
+  width:100%;
+  height:240px;
 }
 
 .toolbar {
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-  margin: 0 0 28px;
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+  margin:0 0 28px;
 }
 
 .btn {
-  background: white;
-  color: #536174;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 16px;
-  box-shadow: var(--shadow);
+  background:#fff;
+  color:#536174;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px 16px;
+  box-shadow:var(--shadow);
 }
 
 .btn:hover {
-  color: var(--blue);
-  border-color: var(--blue);
+  color:var(--blue);
+  border-color:var(--blue);
 }
 
-.controller {
-  display: grid;
-  grid-template-columns: 1fr 1.18fr;
-  gap: 22px;
-  border-top: 3px solid var(--blue);
-  margin-bottom: 30px;
-  padding: 24px;
+.regulator {
+  display:grid;
+  grid-template-columns:1fr 1.18fr;
+  gap:22px;
+  border-top:3px solid var(--blue);
+  margin-bottom:30px;
+  padding:24px;
 }
 
-.controller-left {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 255px;
+.reg-left {
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:255px;
 }
 
-.controller-right {
-  border-left: 1px solid var(--border);
-  padding-left: 22px;
+.reg-right {
+  border-left:1px solid var(--border);
+  padding-left:22px;
 }
 
 .s1temp {
-  font-size: 55px;
-  font-weight: 300;
-  color: var(--blue);
-  margin: 12px 0 0;
+  font-size:55px;
+  font-weight:300;
+  color:var(--blue);
+  margin:12px 0 0;
 }
 
-.s1temp small {
-  font-size: 21px;
-}
+.s1temp small {font-size:21px}
 
 .ctrl-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
 }
 
 .ctrl-detail {
-  background: var(--light);
-  border-radius: 9px;
-  padding: 10px;
+  background:var(--light);
+  border-radius:9px;
+  padding:10px;
 }
 
 .ctrl-detail small {
-  font-size: 9px;
-  color: var(--muted);
+  font-size:9px;
+  color:var(--muted);
 }
 
 .ctrl-detail b {
-  display: block;
-  margin-top: 6px;
-  font-size: 14px;
+  display:block;
+  margin-top:6px;
+  font-size:14px;
 }
 
 .target-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 13px;
+  display:flex;
+  gap:8px;
+  margin-bottom:13px;
 }
 
 .target-row input {
-  flex: 1;
-  min-width: 0;
-  background: var(--light);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px;
+  flex:1;
+  min-width:0;
+  background:var(--light);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
 }
 
 .primary {
-  background: var(--blue);
-  border: 0;
-  color: white;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-weight: 600;
+  background:var(--blue);
+  border:0;
+  color:#fff;
+  border-radius:8px;
+  padding:10px 14px;
+  font-weight:600;
 }
 
 .modes {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
 }
 
 .mode {
-  padding: 11px 3px;
-  background: var(--light);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: #667182;
+  padding:11px 3px;
+  background:var(--light);
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:#667182;
 }
 
 .mode.active {
-  background: #eff6ff;
-  border-color: var(--blue);
-  color: var(--blue);
-  font-weight: 700;
+  background:#eff6ff;
+  border-color:var(--blue);
+  color:var(--blue);
+  font-weight:700;
 }
 
 .feedback {
-  padding: 11px;
-  border-radius: 9px;
-  background: var(--light);
-  color: #607086;
-  margin-top: 13px;
-  font-size: 11px;
-  line-height: 1.6;
+  padding:11px;
+  border-radius:9px;
+  background:var(--light);
+  color:#607086;
+  margin-top:13px;
+  font-size:11px;
+  line-height:1.6;
 }
 
 .feedback.success {
-  background: #edfaef;
-  color: var(--green);
+  background:#edfaef;
+  color:var(--green);
 }
 
 .feedback.error {
-  background: #fff0f0;
-  color: var(--red);
+  background:#fff0f0;
+  color:var(--red);
 }
 
 .fieldlabel {
-  display: block;
-  font-weight: 600;
-  font-size: 11px;
-  margin: 13px 0 7px;
+  display:block;
+  font-weight:600;
+  font-size:11px;
+  margin:13px 0 7px;
 }
 
-.zone {
-  border-top: 3px solid var(--z);
-}
+.zone {border-top:3px solid var(--z)}
 
 .zoneheader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
 }
 
-.zoneheader b {
-  font-size: 13px;
-}
+.zoneheader b {font-size:13px}
 
 .zoneheader small {
-  background: var(--light);
-  padding: 5px 8px;
-  border-radius: 7px;
-  color: var(--muted);
+  background:var(--light);
+  padding:5px 8px;
+  border-radius:7px;
+  color:var(--muted);
 }
 
 .node {
-  display: grid;
-  grid-template-columns: 26px 1fr 58px 38px 55px 43px;
-  gap: 5px;
-  align-items: center;
-  border-top: 1px solid var(--border);
-  padding: 9px 0;
+  display:grid;
+  grid-template-columns:26px 1fr 58px 38px 55px 43px;
+  gap:5px;
+  align-items:center;
+  border-top:1px solid var(--border);
+  padding:9px 0;
 }
 
-.node:first-child {
-  border-top: 0;
-}
+.node:first-child {border-top:0}
 
 .node-temp {
-  font-size: 21px;
-  font-weight: 300;
+  font-size:21px;
+  font-weight:300;
 }
 
 .node-id {
-  color: var(--z);
-  font-weight: 700;
+  color:var(--z);
+  font-weight:700;
 }
 
-.node-hum, .node-age {
-  font-size: 10px;
-  color: var(--muted);
+.node-hum,.node-age {
+  font-size:10px;
+  color:var(--muted);
 }
 
 .status {
-  font-size: 9px;
-  padding: 4px;
-  border-radius: 20px;
-  text-align: center;
-  background: #e9f9ee;
-  color: var(--green);
+  font-size:9px;
+  padding:4px;
+  border-radius:20px;
+  text-align:center;
+  background:#e9f9ee;
+  color:var(--green);
 }
 
 .status.breach {
-  background: #feecec;
-  color: var(--red);
+  background:#feecec;
+  color:var(--red);
 }
 
 .status.offline {
-  background: #fff3df;
-  color: var(--orange);
+  background:#fff3df;
+  color:var(--orange);
 }
 
 .small-btn {
-  font-size: 10px;
-  background: var(--light);
-  border: 1px solid var(--border);
-  padding: 5px 3px;
-  border-radius: 6px;
-  color: #8b98a9;
+  font-size:10px;
+  background:var(--light);
+  border:1px solid var(--border);
+  padding:5px 3px;
+  border-radius:6px;
+  color:#8b98a9;
 }
 
 .small-btn:disabled {
-  opacity: .65;
-  cursor: not-allowed;
+  opacity:.65;
+  cursor:not-allowed;
 }
 
 .bottom {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 330px;
-  gap: 16px;
-  margin-bottom: 16px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 330px;
+  gap:16px;
+  margin-bottom:16px;
 }
 
 .card-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #647184;
-  border-bottom: 1px solid var(--border);
-  padding: 16px 20px;
+  font-size:12px;
+  font-weight:700;
+  color:#647184;
+  border-bottom:1px solid var(--border);
+  padding:16px 20px;
 }
 
 .padless {
-  padding: 0;
-  overflow: hidden;
+  padding:0;
+  overflow:hidden;
 }
 
 #dodagCanvas {
-  width: 100%;
-  height: 340px;
-  display: block;
+  width:100%;
+  height:340px;
+  display:block;
 }
 
 .rightcol {
-  display: grid;
-  gap: 16px;
+  display:grid;
+  gap:16px;
 }
 
-.chart-tabs {
-  display: flex;
-}
+.chart-tabs {display:flex}
 
 .tab {
-  width: 50%;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: white;
-  padding: 13px;
-  color: var(--muted);
+  width:50%;
+  border:0;
+  border-bottom:2px solid transparent;
+  background:#fff;
+  padding:13px;
+  color:var(--muted);
 }
 
 .tab.active {
-  border-color: var(--blue);
-  color: var(--blue);
+  border-color:var(--blue);
+  color:var(--blue);
 }
 
-#tempChart, #humChart {
-  width: 100%;
-  height: 178px;
-  display: block;
+#tempChart,#humChart {
+  width:100%;
+  height:178px;
+  display:block;
 }
 
-.zonestats {
-  padding: 15px;
-}
+.zonestats {padding:15px}
 
 .zone-stat {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
 }
 
-.zone-stat:last-child {
-  border: 0;
-}
+.zone-stat:last-child {border:0}
 
 .mini-values {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 9px;
-  color: var(--muted);
-  font-size: 11px;
+  display:flex;
+  justify-content:space-between;
+  margin-top:9px;
+  color:var(--muted);
+  font-size:11px;
 }
 
-.mini-values b {
-  color: #313d50;
-}
+.mini-values b {color:#313d50}
 
 .logs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
 }
 
 .log-body {
-  height: 205px;
-  overflow: auto;
+  height:205px;
+  overflow:auto;
 }
 
 .log-row {
-  font: 10px Consolas, monospace;
-  padding: 7px 12px;
-  border-bottom: 1px solid #f1f3f6;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font:10px Consolas,monospace;
+  padding:7px 12px;
+  border-bottom:1px solid #f1f3f6;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
-.log-row.error {
-  color: var(--red);
-}
-
-.log-row.control {
-  color: #7c3aed;
-}
+.log-row.error {color:var(--red)}
+.log-row.control {color:#7c3aed}
 
 .alert-row {
-  padding: 10px 13px;
-  border-bottom: 1px solid var(--border);
-  font-size: 11px;
+  padding:10px 13px;
+  border-bottom:1px solid var(--border);
+  font-size:11px;
 }
 
 @media(max-width:900px) {
-  .stats, .zones {
-    grid-template-columns: 1fr;
+  .stats,.zones,.bottom,.regulator,.logs {
+    grid-template-columns:1fr;
   }
 
-  .bottom, .controller, .logs {
-    grid-template-columns: 1fr;
+  .reg-right {
+    border-left:0;
+    border-top:1px solid var(--border);
+    padding:18px 0 0;
   }
 
-  .controller-right {
-    border-left: 0;
-    border-top: 1px solid var(--border);
-    padding: 18px 0 0;
-  }
-
-  .navlinks {
-    display: none;
-  }
-
-  .banner {
-    grid-template-columns: 1fr;
-  }
-
-  nav {
-    gap: 10px;
-  }
+  .navlinks {display:none}
+  .banner {grid-template-columns:1fr}
 
   .node {
-    grid-template-columns: 28px 1fr 58px 38px 58px 43px;
+    grid-template-columns:28px 1fr 58px 38px 58px 43px;
   }
 }
 </style>
 </head>
-
 <body>
 
 <nav>
@@ -610,7 +565,6 @@ h2 small {
 <h2>Sensors <small>3 zones · 6 nodes</small></h2>
 
 <div class="stats">
-
   <div class="card">
     <div class="stat-head">
       <div>
@@ -649,7 +603,6 @@ h2 small {
       <div id="barOff" style="background:var(--orange);width:100%"></div>
     </div>
   </div>
-
 </div>
 
 <div class="banner">
@@ -666,20 +619,33 @@ h2 small {
 </div>
 
 <div class="toolbar">
-  <button class="btn" onclick="triggerBreach()">⚠ Trigger S6 Breach</button>
-  <button class="btn" onclick="healAll()">↺ Heal All Nodes</button>
-  <button class="btn" onclick="killRandom()">☠ Kill Random Node</button>
-  <button class="btn" onclick="clearLog()">✕ Clear Log</button>
+  <button class="btn" onclick="triggerBreach()">
+    ⚠ Trigger S6 Breach
+  </button>
+  <button class="btn" onclick="healAll()">
+    ↺ Heal All Nodes
+  </button>
+  <button class="btn" onclick="killRandom()">
+    ☠ Kill Random Node
+  </button>
+  <button class="btn" onclick="clearLog()">
+    ✕ Clear Log
+  </button>
 </div>
 
-<h2>Temperature Regulator <small>Sensor 1 · Zone A Freezer</small></h2>
+<h2>
+  Temperature Regulator
+  <small>Sensor 1 · Zone A Freezer</small>
+</h2>
 
-<section class="card controller">
-
-  <div class="controller-left">
+<section class="card regulator">
+  <div class="reg-left">
     <div>
       <b>S1 · FREEZER</b>
-      <span id="s1Badge" class="pill">WAITING FOR CONTROLLER</span>
+
+      <span id="s1Badge" class="pill" style="margin-left:8px">
+        WAITING FOR CONTROLLER
+      </span>
 
       <div class="s1temp">
         <span id="s1CurrentTemp">--.-</span>
@@ -709,8 +675,9 @@ h2 small {
     </div>
   </div>
 
-  <div class="controller-right">
+  <div class="reg-right">
     <b>Set optimum temperature</b>
+
     <p class="muted">
       Send heating or cooling commands to Wokwi Sensor 1.
     </p>
@@ -728,6 +695,7 @@ h2 small {
         max="-15"
         step="0.5"
       >
+
       <button class="primary" onclick="setS1Target()">
         Apply Target
       </button>
@@ -736,16 +704,31 @@ h2 small {
     <label class="fieldlabel">Control Mode</label>
 
     <div class="modes">
-      <button class="mode active" id="mode-auto" onclick="setS1Mode('auto')">
+      <button
+        class="mode active"
+        id="mode-auto"
+        onclick="setS1Mode('auto')">
         ↻ Auto
       </button>
-      <button class="mode" id="mode-heat" onclick="setS1Mode('heat')">
+
+      <button
+        class="mode"
+        id="mode-heat"
+        onclick="setS1Mode('heat')">
         ↑ Heat
       </button>
-      <button class="mode" id="mode-cool" onclick="setS1Mode('cool')">
+
+      <button
+        class="mode"
+        id="mode-cool"
+        onclick="setS1Mode('cool')">
         ↓ Cool
       </button>
-      <button class="mode" id="mode-off" onclick="setS1Mode('off')">
+
+      <button
+        class="mode"
+        id="mode-off"
+        onclick="setS1Mode('off')">
         ■ Stop
       </button>
     </div>
@@ -754,7 +737,7 @@ h2 small {
       Waiting for Wokwi S1 controller.
     </div>
 
-    <p class="muted">
+    <p class="muted" style="margin-top:8px">
       Auto maintains the target. Heat and Cool move toward it;
       Stop disables regulation.
     </p>
@@ -765,20 +748,27 @@ h2 small {
 <section class="zones" id="zonesContainer"></section>
 
 <div class="bottom">
-
   <section class="card padless">
-    <div class="card-title">🟢 DODAG TOPOLOGY — LIVE</div>
+    <div class="card-title">
+      🟢 DODAG TOPOLOGY — LIVE
+    </div>
     <canvas id="dodagCanvas"></canvas>
   </section>
 
   <div class="rightcol">
-
     <section class="card padless">
       <div class="chart-tabs">
-        <button class="tab active" id="tabTemp" onclick="switchChart('temp')">
+        <button
+          class="tab active"
+          id="tabTemp"
+          onclick="switchChart('temp')">
           🌡 Temperature
         </button>
-        <button class="tab" id="tabHum" onclick="switchChart('hum')">
+
+        <button
+          class="tab"
+          id="tabHum"
+          onclick="switchChart('hum')">
           💧 Humidity
         </button>
       </div>
@@ -791,12 +781,10 @@ h2 small {
       <div class="card-title">ZONE STATISTICS</div>
       <div id="statsContainer" class="zonestats"></div>
     </section>
-
   </div>
 </div>
 
 <div class="logs">
-
   <section class="card padless">
     <div class="card-title">
       MQTT LOG
@@ -809,7 +797,6 @@ h2 small {
     <div class="card-title">ALERT EVENTS</div>
     <div class="log-body" id="alertLog"></div>
   </section>
-
 </div>
 
 </main>
@@ -820,87 +807,86 @@ h2 small {
 const BROKER_HOST = 'broker.hivemq.com';
 const BROKER_PORT = 8884;
 
-const S1_ROOT = 'coldchain/lab-7b39f2/zoneA/S1';
+const S1_PREFIX = 'coldchain/lab-7b39f2/zoneA/S1';
+const S1_TEMP = S1_PREFIX + '/temperature';
+const S1_STATE = S1_PREFIX + '/control/state';
+const S1_COMMAND = S1_PREFIX + '/control/command';
+const S1_STATUS = S1_PREFIX + '/status';
 
-const S1_TEMP = S1_ROOT + '/temperature';
-const S1_STATE = S1_ROOT + '/control/state';
-const S1_COMMAND = S1_ROOT + '/control/command';
-const S1_STATUS = S1_ROOT + '/status';
-
+const STD = 'coldchain';
 const SAFE_MIN = -25;
 const SAFE_MAX = -15;
 const FRESH_MS = 12000;
 
 const ZONES = {
   A: {
-    name: 'Zone A — Freezer',
-    color: '#2563eb',
-    range: [-25, -15],
-    nodes: ['S1', 'S2']
+    name:'Zone A — Freezer',
+    color:'#2563eb',
+    range:[-25,-15],
+    nodes:['S1','S2']
   },
   B: {
-    name: 'Zone B — Chiller',
-    color: '#0891b2',
-    range: [0, 5],
-    nodes: ['S3', 'S4']
+    name:'Zone B — Chiller',
+    color:'#0891b2',
+    range:[0,5],
+    nodes:['S3','S4']
   },
   C: {
-    name: 'Zone C — Dock',
-    color: '#d97706',
-    range: [2, 8],
-    nodes: ['S5', 'S6']
+    name:'Zone C — Dock',
+    color:'#d97706',
+    range:[2,8],
+    nodes:['S5','S6']
   }
 };
 
 const NODE_ZONE = {
-  S1: 'A',
-  S2: 'A',
-  S3: 'B',
-  S4: 'B',
-  S5: 'C',
-  S6: 'C'
+  S1:'A',
+  S2:'A',
+  S3:'B',
+  S4:'B',
+  S5:'C',
+  S6:'C'
 };
 
-const ids = Object.keys(NODE_ZONE);
+const IDS = ['S1','S2','S3','S4','S5','S6'];
 
 const data = Object.fromEntries(
-  ids.map(id => [
+  IDS.map(id => [
     id,
     {
-      temp: null,
-      hum: null,
-      seen: 0,
-      breach: false,
-      history: [],
-      humidityHistory: [],
-      manualOff: false
+      temp:null,
+      hum:null,
+      seen:0,
+      breach:false,
+      history:[],
+      humidityHistory:[],
+      manualOff:false
     }
   ])
 );
 
 const DOG = {
-  root: {parent: null, rank: 1, alive: true},
-  routerA: {parent: 'root', rank: 2, alive: true},
-  routerB: {parent: 'root', rank: 2, alive: true},
-  routerC: {parent: 'root', rank: 2, alive: true},
-  S1: {parent: 'routerA', rank: 3, alive: false},
-  S2: {parent: 'routerA', rank: 3, alive: false},
-  S3: {parent: 'routerB', rank: 3, alive: false},
-  S4: {parent: 'routerB', rank: 3, alive: false},
-  S5: {parent: 'routerC', rank: 3, alive: false},
-  S6: {parent: 'routerC', rank: 3, alive: false}
+  root:{parent:null,rank:1,alive:true},
+  routerA:{parent:'root',rank:2,alive:true},
+  routerB:{parent:'root',rank:2,alive:true},
+  routerC:{parent:'root',rank:2,alive:true},
+  S1:{parent:'routerA',rank:3,alive:false},
+  S2:{parent:'routerA',rank:3,alive:false},
+  S3:{parent:'routerB',rank:3,alive:false},
+  S4:{parent:'routerB',rank:3,alive:false},
+  S5:{parent:'routerC',rank:3,alive:false},
+  S6:{parent:'routerC',rank:3,alive:false}
 };
 
 const s1 = {
-  mode: 'auto',
-  target: -20,
-  actuator: null,
-  ambient: null,
-  seen: 0,
-  modeRequested: null,
-  pending: null,
-  feedback: '',
-  feedbackClass: ''
+  mode:'auto',
+  target:-20,
+  actuator:null,
+  ambient:null,
+  seen:0,
+  pending:null,
+  feedback:'',
+  feedbackClass:''
 };
 
 let mqttClient = null;
@@ -920,30 +906,32 @@ const fresh = id =>
   data[id].seen > 0 &&
   Date.now() - data[id].seen < FRESH_MS;
 
-const controllerOnline = () =>
+const ctrlOnline = () =>
   fresh('S1') &&
   s1.seen > 0 &&
   Date.now() - s1.seen < FRESH_MS;
 
-const zoneFor = id => ZONES[NODE_ZONE[id]];
+function tempTopicFor(id) {
+  return id === 'S1'
+    ? S1_TEMP
+    : `${STD}/zone${NODE_ZONE[id]}/${id}/temperature`;
+}
 
-function esc(v) {
-  return String(v).replace(/[&<>"']/g, c => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[c]));
+function statusTopicFor(id) {
+  return id === 'S1'
+    ? S1_STATUS
+    : `${STD}/zone${NODE_ZONE[id]}/${id}/status`;
 }
 
 function buildZones() {
   $('zonesContainer').innerHTML =
-    Object.entries(ZONES).map(([z, zone]) => `
+    Object.entries(ZONES).map(([z,zone]) => `
       <article class="card zone" style="--z:${zone.color}">
         <header class="zoneheader">
           <b>${zone.name}</b>
-          <small>${zone.range[0]}° to ${zone.range[1]}°C</small>
+          <small>
+            ${zone.range[0]}° to ${zone.range[1]}°C
+          </small>
         </header>
         <div>
           ${zone.nodes.map(id => `
@@ -952,13 +940,16 @@ function buildZones() {
               <span class="node-temp" id="temp-${id}">--.-</span>
               <span class="node-hum" id="hum-${id}">--%</span>
               <span class="node-age" id="age-${id}">--</span>
-              <span class="status offline" id="st-${id}">offline</span>
+              <span class="status offline" id="st-${id}">
+                offline
+              </span>
               <button
                 id="btn-${id}"
                 class="small-btn"
                 onclick="toggleNode('${id}')"
-                ${id === 'S1' ? 'disabled title="Managed by Wokwi"' : ''}
-              >
+                ${id === 'S1'
+                  ? 'disabled title="Managed by Wokwi"'
+                  : ''}>
                 ${id === 'S1' ? 'Wokwi' : 'kill'}
               </button>
             </div>
@@ -968,39 +959,34 @@ function buildZones() {
     `).join('');
 }
 
-function setAlive(id, alive) {
-  DOG[id].alive = alive;
-
-  const b = $('btn-' + id);
-
-  if (b && id !== 'S1') {
-    b.textContent = alive ? 'kill' : 'revive';
-  }
-
-  refreshCounters();
-}
-
 function refreshCounters() {
-  const online = ids.filter(id => fresh(id)).length;
+  const online = IDS.filter(
+    id => fresh(id)
+  ).length;
 
-  const breach = ids.filter(
+  const breach = IDS.filter(
     id => fresh(id) && data[id].breach
   ).length;
 
   $('countOnline').textContent = online;
   $('countBreach').textContent = breach;
-  $('countOff').textContent = ids.length - online;
+  $('countOff').textContent = IDS.length - online;
 
-  $('barOnline').style.width = (online / 6 * 100) + '%';
-  $('barBreach').style.width = (breach / 6 * 100) + '%';
-  $('barOff').style.width = ((6 - online) / 6 * 100) + '%';
+  $('barOnline').style.width =
+    (online / 6 * 100) + '%';
+
+  $('barBreach').style.width =
+    (breach / 6 * 100) + '%';
+
+  $('barOff').style.width =
+    ((6 - online) / 6 * 100) + '%';
 }
 
 function renderNodes() {
-  for (const id of ids) {
+  for (const id of IDS) {
     const n = data[id];
     const isFresh = fresh(id);
-    const zone = zoneFor(id);
+    const zone = ZONES[NODE_ZONE[id]];
 
     DOG[id].alive = isFresh;
 
@@ -1008,7 +994,9 @@ function renderNodes() {
       isFresh ? n.temp.toFixed(1) : '--.-';
 
     $('temp-' + id).style.color =
-      n.breach && isFresh ? 'var(--red)' : zone.color;
+      n.breach && isFresh
+        ? 'var(--red)'
+        : zone.color;
 
     $('hum-' + id).textContent =
       isFresh && Number.isFinite(n.hum)
@@ -1017,7 +1005,9 @@ function renderNodes() {
 
     $('age-' + id).textContent =
       isFresh
-        ? Math.floor((Date.now() - n.seen) / 1000) + 's'
+        ? Math.floor(
+            (Date.now() - n.seen) / 1000
+          ) + 's'
         : '--';
 
     const el = $('st-' + id);
@@ -1029,7 +1019,9 @@ function renderNodes() {
 
     el.className =
       'status ' +
-      (isFresh ? (n.breach ? 'breach' : '') : 'offline');
+      (isFresh
+        ? (n.breach ? 'breach' : '')
+        : 'offline');
 
     if (id !== 'S1') {
       $('btn-' + id).textContent =
@@ -1040,9 +1032,9 @@ function renderNodes() {
   refreshCounters();
 }
 
-function pushReading(id, temp, hum) {
+function pushReading(id,temp,hum) {
   const n = data[id];
-  const zone = zoneFor(id);
+  const zone = ZONES[NODE_ZONE[id]];
 
   n.temp = temp;
   n.hum = hum;
@@ -1071,7 +1063,8 @@ function pushReading(id, temp, hum) {
   }
 
   if (id === 'S6') {
-    $('bannerTemp').textContent = temp.toFixed(1);
+    $('bannerTemp').textContent =
+      temp.toFixed(1);
 
     $('bannerDate').textContent =
       new Date().toLocaleDateString('en-GB');
@@ -1084,7 +1077,8 @@ function pushReading(id, temp, hum) {
 
   tick++;
 
-  $('tickPill').textContent = 'tick: ' + tick;
+  $('tickPill').textContent =
+    'tick: ' + tick;
 
   renderNodes();
   renderRegulator();
@@ -1092,19 +1086,104 @@ function pushReading(id, temp, hum) {
   drawCharts();
 }
 
-function feedback(message, kind = '') {
-  s1.feedback = message;
-  s1.feedbackClass = kind;
+function receiveController(payload) {
+  if (
+    !payload ||
+    payload.node !== 'S1' ||
+    (
+      payload.controller !== true &&
+      payload.controller !== 'true'
+    )
+  ) {
+    return;
+  }
+
+  s1.seen = Date.now();
+
+  if (
+    ['auto','heat','cool','off'].includes(payload.mode)
+  ) {
+    s1.mode = payload.mode;
+  }
+
+  if (payload.target != null) {
+    const t = Number(payload.target);
+
+    if (
+      Number.isFinite(t) &&
+      t >= SAFE_MIN &&
+      t <= SAFE_MAX
+    ) {
+      s1.target = t;
+    }
+  }
+
+  if (
+    ['cool','heat','off'].includes(payload.actuator)
+  ) {
+    s1.actuator = payload.actuator;
+  }
+
+  if (
+    payload.ambient != null &&
+    Number.isFinite(Number(payload.ambient))
+  ) {
+    s1.ambient = Number(payload.ambient);
+  }
+
+  if (
+    s1.pending &&
+    payload.request_id === s1.pending.id &&
+    typeof payload.ok === 'boolean'
+  ) {
+    const p = s1.pending;
+
+    s1.pending = null;
+
+    if (!payload.ok) {
+      s1.feedback =
+        'ESP32 rejected the command.';
+
+      s1.feedbackClass = 'error';
+    } else if (
+      payload.mode !== p.mode ||
+      payload.target == null ||
+      !Number.isFinite(Number(payload.target)) ||
+      Math.abs(
+        Number(payload.target) - p.target
+      ) > 0.06
+    ) {
+      s1.feedback =
+        'ESP32 acknowledged a different mode or target.';
+
+      s1.feedbackClass = 'error';
+    } else {
+      s1.feedback =
+        `✓ Wokwi confirmed ${p.mode.toUpperCase()} at ${p.target.toFixed(1)}°C.`;
+
+      s1.feedbackClass = 'success';
+    }
+  }
+
+  if (
+    !s1.pending &&
+    s1.feedback ===
+      'Wokwi S1 not online yet. Wait for a live reading first.'
+  ) {
+    s1.feedback = '';
+    s1.feedbackClass = '';
+  }
 
   renderRegulator();
 }
 
 function renderRegulator() {
-  const ok = controllerOnline();
-  const n = data.S1;
+  const ok = ctrlOnline();
 
   $('s1CurrentTemp').textContent =
-    fresh('S1') ? n.temp.toFixed(1) : '--.-';
+    fresh('S1')
+      ? data.S1.temp.toFixed(1)
+      : '--.-';
 
   $('s1ActiveTarget').textContent =
     ok && Number.isFinite(s1.target)
@@ -1119,9 +1198,9 @@ function renderRegulator() {
   $('s1Actuator').textContent =
     ok
       ? ({
-          cool: '❄ Cooling',
-          heat: '♨ Heating',
-          off: 'Idle'
+          cool:'❄ Cooling',
+          heat:'♨ Heating',
+          off:'Idle'
         }[s1.actuator] || 'Unknown')
       : 'Unknown';
 
@@ -1140,126 +1219,40 @@ function renderRegulator() {
 
   if (
     s1.pending &&
-    Date.now() - s1.pending.at > 13000
+    Date.now() - s1.pending.at > 15000
   ) {
-    const pending = s1.pending;
-
     s1.pending = null;
 
-    s1.feedback = pending.echo
-      ? 'Broker echoed your command, but the ESP32 did not acknowledge it. Check Wokwi Serial Monitor.'
-      : 'No matching ESP32 acknowledgement. Check Wokwi and MQTT topics.';
+    s1.feedback =
+      'No matching ESP32 acknowledgement within 15s. Check Wokwi for COMMAND ACCEPTED and the same request_id; the broker connection alone is not proof of delivery.';
 
     s1.feedbackClass = 'error';
   }
 
-  const message = s1.pending
-    ? 'Command sent. Waiting for matching ESP32 request ID...'
+  const msg = s1.pending
+    ? 'Command sent — waiting for ESP32 acknowledgement…'
     : s1.feedback ||
       (!connected()
         ? 'MQTT broker disconnected.'
         : !ok
-          ? 'Waiting for live Wokwi S1 telemetry and controller state.'
-          : `Controller: ${s1.mode} | Actuator: ${s1.actuator || 'unknown'}`);
+          ? 'Waiting for live Wokwi S1 telemetry…'
+          : `Controller active · mode: ${s1.mode} · actuator: ${s1.actuator || 'unknown'}`);
 
-  $('s1Feedback').textContent = message;
+  $('s1Feedback').textContent = msg;
 
   $('s1Feedback').className =
     'feedback ' + s1.feedbackClass;
 
-  for (const mode of ['auto', 'heat', 'cool', 'off']) {
-    const b = $('mode-' + mode);
-
-    b.classList.toggle(
+  ['auto','heat','cool','off'].forEach(m => {
+    $('mode-' + m).classList.toggle(
       'active',
-      mode === s1.mode
+      m === s1.mode
     );
-
-    b.setAttribute(
-      'aria-pressed',
-      String(mode === s1.mode)
-    );
-  }
+  });
 }
 
-function receiveController(payload) {
-  if (
-    !payload ||
-    payload.node !== 'S1' ||
-    payload.controller !== true
-  ) {
-    return;
-  }
-
-  s1.seen = Date.now();
-
-  if (
-    typeof payload.mode === 'string' &&
-    ['auto', 'heat', 'cool', 'off'].includes(payload.mode)
-  ) {
-    s1.mode = payload.mode;
-  }
-
-  if (
-    Number.isFinite(Number(payload.target)) &&
-    payload.target !== null
-  ) {
-    const t = Number(payload.target);
-
-    if (t >= SAFE_MIN && t <= SAFE_MAX) {
-      s1.target = t;
-    }
-  }
-
-  if (['cool', 'heat', 'off'].includes(payload.actuator)) {
-    s1.actuator = payload.actuator;
-  }
-
-  if (
-    payload.ambient !== null &&
-    payload.ambient !== undefined &&
-    Number.isFinite(Number(payload.ambient))
-  ) {
-    s1.ambient = Number(payload.ambient);
-  }
-
-  if (
-    s1.pending &&
-    payload.request_id === s1.pending.id &&
-    typeof payload.ok === 'boolean'
-  ) {
-    const p = s1.pending;
-
-    s1.pending = null;
-
-    if (payload.ok === false) {
-      feedback(
-        'ESP32 rejected the command.',
-        'error'
-      );
-    } else if (
-      s1.mode !== p.mode ||
-      Math.abs(s1.target - p.target) > 0.051
-    ) {
-      feedback(
-        'ESP32 responded, but returned a different mode or target.',
-        'error'
-      );
-    } else {
-      feedback(
-        `✓ Wokwi confirmed ${s1.mode.toUpperCase()} at ${s1.target.toFixed(1)}°C.`,
-        'success'
-      );
-    }
-  }
-
-  renderRegulator();
-}
-
-function targetInput() {
-  const input = $('s1TargetInput');
-
-  const raw = input.value.trim();
+function sendCommand(mode) {
+  const raw = $('s1TargetInput').value.trim();
   const v = Number(raw);
 
   if (
@@ -1268,90 +1261,94 @@ function targetInput() {
     v < SAFE_MIN ||
     v > SAFE_MAX
   ) {
-    feedback(
-      'Target must be between −25°C and −15°C.',
-      'error'
-    );
+    s1.feedback =
+      'Target must be between −25°C and −15°C.';
 
-    return null;
+    s1.feedbackClass = 'error';
+
+    renderRegulator();
+    return;
   }
 
-  return v;
-}
-
-function sendCommand(mode) {
-  const target = targetInput();
-
-  if (target === null) {
+  if (
+    !['auto','heat','cool','off'].includes(mode)
+  ) {
     return;
   }
 
   if (!connected()) {
-    feedback(
-      'MQTT broker is offline.',
-      'error'
-    );
-
+    s1.feedback = 'MQTT broker offline.';
+    s1.feedbackClass = 'error';
+    renderRegulator();
     return;
   }
 
-  if (!controllerOnline()) {
-    feedback(
-      'Wokwi controller is not online. Start Wokwi and wait for a live S1 reading before sending commands.',
-      'error'
-    );
+  if (s1.pending) {
+    s1.feedback =
+      'Previous command is still awaiting an ESP32 response.';
 
+    s1.feedbackClass = 'error';
+    renderRegulator();
     return;
   }
 
-  const requestId =
+  const reqId =
     'dash-' +
     Date.now() +
     '-' +
-    Math.random().toString(36).slice(2, 8);
+    Math.random().toString(36).slice(2,8);
 
   const cmd = {
-    node: 'S1',
+    node:'S1',
     mode,
-    target,
-    request_id: requestId,
-    ts: Date.now()
+    target:v,
+    request_id:reqId,
+    ts:Date.now()
   };
 
-  const message = new Paho.MQTT.Message(
+  const msg = new Paho.MQTT.Message(
     JSON.stringify(cmd)
   );
 
-  message.destinationName = S1_COMMAND;
-  message.qos = 1;
-  message.retained = false;
+  msg.destinationName = S1_COMMAND;
+  msg.qos = 1;
+  msg.retained = false;
+
+  s1.pending = {
+    id:reqId,
+    mode,
+    target:v,
+    at:Date.now()
+  };
+
+  s1.feedback = '';
+  s1.feedbackClass = '';
 
   try {
-    mqttClient.send(message);
-
-    s1.pending = {
-      id: requestId,
-      mode,
-      target,
-      at: Date.now(),
-      echo: false
-    };
-
-    s1.feedback = '';
-    s1.feedbackClass = '';
+    mqttClient.send(msg);
 
     console.log(
-      '[S1] Published',
+      '[S1 COMMAND SENT]',
       S1_COMMAND,
       cmd
     );
 
-    renderRegulator();
-  } catch (e) {
-    feedback(
-      'MQTT publish error: ' + e.message,
-      'error'
+    logMsg(
+      'control',
+      '→ CMD',
+      JSON.stringify(cmd)
     );
+
+    renderRegulator();
+  } catch(e) {
+    s1.pending = null;
+
+    s1.feedback =
+      'MQTT publish error: ' + e.message;
+
+    s1.feedbackClass = 'error';
+
+    renderRegulator();
   }
 }
 
@@ -1359,57 +1356,11 @@ function setS1Target() {
   sendCommand(s1.mode);
 }
 
-function setS1Mode(mode) {
-  if (['auto', 'heat', 'cool', 'off'].includes(mode)) {
-    sendCommand(mode);
-  }
-}
-
-function logMsg(kind, topic, text) {
-  logCount++;
-
-  $('msgCount').textContent =
-    logCount + ' msgs';
-
-  const row = document.createElement('div');
-
-  row.className = 'log-row ' + kind;
-
-  row.textContent =
-    new Date().toLocaleTimeString('en-GB') +
-    '  ' +
-    topic +
-    '  ' +
-    String(text).slice(0, 150);
-
-  $('mqttLog').appendChild(row);
-
-  if ($('mqttLog').children.length > 250) {
-    $('mqttLog').removeChild(
-      $('mqttLog').firstChild
-    );
-  }
-
-  $('mqttLog').scrollTop =
-    $('mqttLog').scrollHeight;
-}
-
-function addAlert(name, description) {
-  const row = document.createElement('div');
-
-  row.className = 'alert-row';
-
-  row.textContent =
-    new Date().toLocaleTimeString('en-GB') +
-    '  ' +
-    name.toUpperCase() +
-    ': ' +
-    description;
-
-  $('alertLog').prepend(row);
-
-  if ($('alertLog').children.length > 80) {
-    $('alertLog').lastChild.remove();
+function setS1Mode(m) {
+  if (
+    ['auto','heat','cool','off'].includes(m)
+  ) {
+    sendCommand(m);
   }
 }
 
@@ -1417,89 +1368,96 @@ function handleMessage(message) {
   const topic = message.destinationName;
   const raw = message.payloadString;
 
-  const kind = topic.includes('/control/')
-    ? 'control'
-    : topic.includes('/alerts/')
-      ? 'error'
-      : '';
+  const kind =
+    topic.includes('/control/')
+      ? 'control'
+      : topic.includes('/alerts/')
+        ? 'error'
+        : '';
 
-  logMsg(kind, topic, raw);
+  logMsg(kind,topic,raw);
 
-  if (topic === S1_COMMAND) {
-    try {
-      const echo = JSON.parse(raw);
-
-      if (
-        s1.pending &&
-        echo.request_id === s1.pending.id
-      ) {
-        s1.pending.echo = true;
-      }
-    } catch (e) {}
-
-    return;
+  if (
+    topic === S1_TEMP ||
+    topic === S1_STATE ||
+    topic === S1_STATUS
+  ) {
+    console.log(
+      '[S1 MQTT RECEIVED]',
+      topic,
+      raw
+    );
   }
 
   if (topic === S1_STATE) {
     try {
       receiveController(JSON.parse(raw));
-    } catch (e) {
-      console.error('Bad S1 state', e);
+    } catch(e) {
+      console.warn('Invalid S1 state',e);
     }
+    return;
+  }
 
+  if (topic === S1_STATUS) {
+    if (
+      raw.trim() === 'offline' &&
+      !fresh('S1')
+    ) {
+      data.S1.seen = 0;
+      renderNodes();
+      renderRegulator();
+    }
     return;
   }
 
   if (topic.endsWith('/temperature')) {
-    let payload;
+    let p;
 
     try {
-      payload = JSON.parse(raw);
-    } catch (e) {
+      p = JSON.parse(raw);
+    } catch(e) {
       return;
     }
 
     if (
-      !payload ||
-      !Object.prototype.hasOwnProperty.call(
-        data,
-        payload.node
-      )
+      !p ||
+      !IDS.includes(p.node)
     ) {
       return;
     }
 
-    const id = payload.node;
+    const id = p.node;
 
-    const expected = id === 'S1'
-      ? S1_TEMP
-      : `coldchain/zone${NODE_ZONE[id]}/${id}/temperature`;
-
-    if (topic !== expected) {
+    if (topic !== tempTopicFor(id)) {
       return;
     }
 
     if (
       id === 'S1' &&
-      payload.controller !== true
+      p.controller !== true &&
+      p.controller !== 'true'
     ) {
       return;
     }
-
-    const temp = Number(payload.temp);
-
-    const hum =
-      payload.hum === undefined ||
-      payload.hum === null
-        ? null
-        : Number(payload.hum);
 
     if (
-      payload.temp === null ||
-      !Number.isFinite(temp)
+      p.temp === null ||
+      p.temp === undefined ||
+      p.temp === ''
     ) {
       return;
     }
+
+    const temp = Number(p.temp);
+
+    if (!Number.isFinite(temp)) {
+      return;
+    }
+
+    const hum =
+      p.hum == null || p.hum === ''
+        ? null
+        : Number(p.hum);
 
     if (!data[id].manualOff) {
       pushReading(
@@ -1509,7 +1467,7 @@ function handleMessage(message) {
       );
 
       if (id === 'S1') {
-        receiveController(payload);
+        receiveController(p);
       }
     }
 
@@ -1517,40 +1475,20 @@ function handleMessage(message) {
   }
 
   if (topic.endsWith('/status')) {
-    for (const id of ids) {
-      const expected = id === 'S1'
-        ? S1_STATUS
-        : `coldchain/zone${NODE_ZONE[id]}/${id}/status`;
-
-      if (topic !== expected) {
+    for (const id of IDS) {
+      if (
+        id === 'S1' ||
+        topic !== statusTopicFor(id)
+      ) {
         continue;
       }
 
       if (
-        raw === 'offline' &&
+        raw.trim() === 'offline' &&
         (!fresh(id) || data[id].manualOff)
       ) {
         data[id].seen = 0;
-
         renderNodes();
-        renderRegulator();
-
-        addAlert(
-          'offline',
-          id + ' status offline'
-        );
-      }
-
-      if (
-        raw === 'online' &&
-        id !== 'S1' &&
-        data[id].manualOff === false
-      ) {
-        logMsg(
-          '',
-          topic,
-          id + ' reconnected'
-        );
       }
 
       return;
@@ -1562,34 +1500,30 @@ function handleMessage(message) {
     topic === 'coldchain/alerts/recover'
   ) {
     try {
-      const payload = JSON.parse(raw);
+      const p = JSON.parse(raw);
 
       addAlert(
         topic.endsWith('breach')
           ? 'breach'
           : 'recover',
-        (payload.node || payload.zone || 'sensor') +
-        ' ' +
-        (payload.temp ?? '') +
-        '°C'
+        (p.node || p.zone || 'sensor') +
+          ' ' +
+          (p.temp ?? '') +
+          '°C'
       );
-    } catch (e) {}
+    } catch(e) {}
   }
 }
 
 function connectBroker() {
   if (typeof Paho === 'undefined') {
-    feedback(
-      'Paho MQTT library failed to load. Check internet connection.',
-      'error'
-    );
-
+    console.error('Paho MQTT library not loaded');
     return;
   }
 
   const id =
     'coldchain_dash_' +
-    Math.random().toString(36).slice(2, 12);
+    Math.random().toString(36).slice(2,12);
 
   const c = new Paho.MQTT.Client(
     BROKER_HOST,
@@ -1599,7 +1533,7 @@ function connectBroker() {
 
   mqttClient = c;
 
-  c.onConnectionLost = event => {
+  c.onConnectionLost = ev => {
     if (mqttClient !== c) {
       return;
     }
@@ -1609,28 +1543,23 @@ function connectBroker() {
 
     $('brokerPill').className = 'pill';
 
-    console.warn(
-      '[MQTT] connection lost',
-      event.errorMessage
-    );
-
     renderRegulator();
 
     if (!reconnectTimer) {
       reconnectTimer = setTimeout(() => {
         reconnectTimer = null;
         connectBroker();
-      }, 3500);
+      },3500);
     }
   };
 
   c.onMessageArrived = handleMessage;
 
   c.connect({
-    useSSL: true,
-    cleanSession: true,
-    keepAliveInterval: 30,
-    timeout: 10,
+    useSSL:true,
+    cleanSession:true,
+    keepAliveInterval:30,
+    timeout:10,
 
     onSuccess: () => {
       if (mqttClient !== c) {
@@ -1643,34 +1572,41 @@ function connectBroker() {
       $('brokerPill').className =
         'pill good';
 
-      c.subscribe('coldchain/#', {
-        qos: 0,
+      const topics = [
+        'coldchain/+/+/temperature',
+        'coldchain/+/+/status',
+        'coldchain/alerts/#',
+        S1_TEMP,
+        S1_STATE,
+        S1_STATUS
+      ];
 
-        onSuccess: () => {
-          console.log(
-            '[MQTT] subscribed coldchain/# including ' +
-            S1_ROOT
-          );
+      topics.forEach(topic => {
+        c.subscribe(topic,{
+          qos:0,
 
-          logMsg(
-            '',
-            'system',
-            'Subscriptions ready'
-          );
-        },
+          onSuccess: () => {
+            console.log(
+              '[MQTT SUBSCRIBED]',
+              topic
+            );
+          },
 
-        onFailure: e => {
-          console.error(
-            '[MQTT] Subscribe failed',
-            e
-          );
-
-          feedback(
-            'MQTT subscription failed.',
-            'error'
-          );
-        }
+          onFailure: e => {
+            console.error(
+              '[MQTT SUBSCRIBE FAILED]',
+              topic,
+              e
+            );
+          }
+        });
       });
+
+      logMsg(
+        '',
+        'system',
+        'Connected — subscribed to S1 and S2–S6 topics'
+      );
 
       renderRegulator();
     },
@@ -1679,11 +1615,6 @@ function connectBroker() {
       if (mqttClient !== c) {
         return;
       }
-
-      console.error(
-        '[MQTT] connect failed',
-        e
-      );
 
       $('brokerPill').textContent =
         'BROKER: FAILED';
@@ -1697,7 +1628,7 @@ function connectBroker() {
         reconnectTimer = setTimeout(() => {
           reconnectTimer = null;
           connectBroker();
-        }, 4500);
+        },4500);
       }
     }
   });
@@ -1705,11 +1636,11 @@ function connectBroker() {
 
 function toggleNode(id) {
   if (id === 'S1') {
-    feedback(
-      'S1 runs in Wokwi. Use Wokwi to start or stop S1.',
-      'error'
-    );
+    s1.feedback =
+      'S1 is managed by Wokwi. Use Wokwi to start or stop it.';
 
+    s1.feedbackClass = 'error';
+    renderRegulator();
     return;
   }
 
@@ -1718,7 +1649,6 @@ function toggleNode(id) {
   }
 
   const n = data[id];
-
   n.manualOff = !n.manualOff;
 
   const msg = new Paho.MQTT.Message(
@@ -1726,7 +1656,7 @@ function toggleNode(id) {
   );
 
   msg.destinationName =
-    `coldchain/zone${NODE_ZONE[id]}/${id}/status`;
+    `${STD}/zone${NODE_ZONE[id]}/${id}/status`;
 
   msg.qos = 1;
   msg.retained = false;
@@ -1741,34 +1671,30 @@ function toggleNode(id) {
 
   addAlert(
     n.manualOff ? 'offline' : 'recover',
-    id + ' manually ' +
-    (n.manualOff ? 'disabled' : 'revived')
+    id +
+      ' manually ' +
+      (n.manualOff ? 'disabled' : 'revived')
   );
 }
 
 function healAll() {
-  for (const id of ids) {
-    if (
+  IDS.filter(
+    id =>
       id !== 'S1' &&
       data[id].manualOff
-    ) {
-      toggleNode(id);
-    }
-  }
+  ).forEach(toggleNode);
 }
 
 function killRandom() {
-  const choices = ids.filter(
+  const a = IDS.filter(
     id =>
       id !== 'S1' &&
       !data[id].manualOff
   );
 
-  if (choices.length) {
+  if (a.length) {
     toggleNode(
-      choices[
-        Math.floor(Math.random() * choices.length)
-      ]
+      a[Math.floor(Math.random() * a.length)]
     );
   }
 }
@@ -1780,11 +1706,11 @@ function triggerBreach() {
 
   const msg = new Paho.MQTT.Message(
     JSON.stringify({
-      node: 'S6',
-      zone: 'zoneC',
-      temp: 14,
-      type: 'COOLING',
-      ts: Date.now()
+      node:'S6',
+      zone:'zoneC',
+      temp:14,
+      type:'COOLING',
+      ts:Date.now()
     })
   );
 
@@ -1792,8 +1718,12 @@ function triggerBreach() {
     'coldchain/alerts/breach';
 
   msg.qos = 1;
-
   mqttClient.send(msg);
+
+  addAlert(
+    'breach',
+    'S6 manual trigger +14°C'
+  );
 }
 
 function clearLog() {
@@ -1804,27 +1734,27 @@ function clearLog() {
 
 function renderStats() {
   $('statsContainer').innerHTML =
-    Object.entries(ZONES).map(([zoneId, z]) => {
-      const readings = z.nodes.filter(
+    Object.entries(ZONES).map(([z,zone]) => {
+      const reads = zone.nodes.filter(
         id => fresh(id)
       );
 
-      const temps = readings.map(
+      const temps = reads.map(
         id => data[id].temp
       );
 
-      const hums = readings
-        .map(id => data[id].hum)
-        .filter(Number.isFinite);
+      const hums = reads.map(
+        id => data[id].hum
+      ).filter(Number.isFinite);
 
       const fmt = a => a.length
-        ? `${Math.min(...a).toFixed(1)} / ${(a.reduce((s, n) => s + n, 0) / a.length).toFixed(1)} / ${Math.max(...a).toFixed(1)}`
+        ? `${Math.min(...a).toFixed(1)} / ${(a.reduce((s,n)=>s+n,0)/a.length).toFixed(1)} / ${Math.max(...a).toFixed(1)}`
         : '— / — / —';
 
       return `
         <div class="zone-stat">
-          <b style="color:${z.color}">
-            ${esc(z.name)}
+          <b style="color:${zone.color}">
+            ${zone.name}
           </b>
 
           <div class="mini-values">
@@ -1833,7 +1763,7 @@ function renderStats() {
           </div>
 
           <div class="mini-values">
-            <span>Humidity min / avg / max</span>
+            <span>Humid min / avg / max</span>
             <b>${fmt(hums)}</b>
           </div>
         </div>
@@ -1841,7 +1771,29 @@ function renderStats() {
     }).join('');
 }
 
-function canvasContext(id) {
+function switchChart(w) {
+  activeChart = w;
+
+  $('tempChart').style.display =
+    w === 'temp' ? 'block' : 'none';
+
+  $('humChart').style.display =
+    w === 'hum' ? 'block' : 'none';
+
+  $('tabTemp').classList.toggle(
+    'active',
+    w === 'temp'
+  );
+
+  $('tabHum').classList.toggle(
+    'active',
+    w === 'hum'
+  );
+
+  drawCharts();
+}
+
+function canvasCtx(id) {
   const el = $(id);
 
   const w = Math.max(
@@ -1857,65 +1809,71 @@ function canvasContext(id) {
   const d = window.devicePixelRatio || 1;
 
   if (
-    el.width !== Math.round(w * d) ||
-    el.height !== Math.round(h * d)
+    el.width !== Math.round(w*d) ||
+    el.height !== Math.round(h*d)
   ) {
-    el.width = Math.round(w * d);
-    el.height = Math.round(h * d);
+    el.width = Math.round(w*d);
+    el.height = Math.round(h*d);
   }
 
   const ctx = el.getContext('2d');
 
-  ctx.setTransform(d, 0, 0, d, 0, 0);
-  ctx.clearRect(0, 0, w, h);
+  ctx.setTransform(d,0,0,d,0,0);
+  ctx.clearRect(0,0,w,h);
 
-  return {ctx, w, h};
+  return {ctx,w,h};
 }
 
-function drawSeries(id, values, color, min, max, bg = false) {
-  const {ctx, w, h} = canvasContext(id);
+function drawSeries(
+  id,
+  values,
+  color,
+  min,
+  max,
+  bg=false
+) {
+  const {ctx,w,h} = canvasCtx(id);
 
   if (!values.length) {
     return;
   }
 
   const pad = bg ? 20 : 36;
-  const innerW = w - pad - 18;
-  const innerH = h - 42;
+  const iW = w - pad - 18;
+  const iH = h - 42;
 
   const x = i =>
     pad +
     (values.length === 1
-      ? innerW
-      : innerW * i / (values.length - 1));
+      ? iW
+      : iW*i/(values.length-1));
 
   const y = v =>
     20 +
-    innerH -
-    (v - min) / (max - min) * innerH;
+    iH -
+    (v-min)/(max-min)*iH;
 
-  ctx.strokeStyle = bg
-    ? '#ffffff33'
-    : '#e5e9ee';
+  ctx.strokeStyle =
+    bg ? '#ffffff33' : '#e5e9ee';
 
   ctx.lineWidth = 1;
 
-  for (let j = 0; j <= 4; j++) {
-    const gy = 20 + j * innerH / 4;
+  for (let j=0;j<=4;j++) {
+    const gy = 20+j*iH/4;
 
     ctx.beginPath();
-    ctx.moveTo(pad, gy);
-    ctx.lineTo(w - 18, gy);
+    ctx.moveTo(pad,gy);
+    ctx.lineTo(w-18,gy);
     ctx.stroke();
   }
 
-  if (values.length > 1) {
+  if (values.length>1) {
     ctx.beginPath();
 
-    values.forEach((v, i) =>
+    values.forEach((v,i) =>
       i
-        ? ctx.lineTo(x(i), y(v))
-        : ctx.moveTo(x(i), y(v))
+        ? ctx.lineTo(x(i),y(v))
+        : ctx.moveTo(x(i),y(v))
     );
 
     ctx.strokeStyle = color;
@@ -1923,16 +1881,16 @@ function drawSeries(id, values, color, min, max, bg = false) {
     ctx.stroke();
   }
 
-  const last = values[values.length - 1];
+  const last = values[values.length-1];
 
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.arc(
-    x(values.length - 1),
+    x(values.length-1),
     y(last),
     4,
     0,
-    Math.PI * 2
+    Math.PI*2
   );
   ctx.fill();
 
@@ -1941,7 +1899,7 @@ function drawSeries(id, values, color, min, max, bg = false) {
     ctx.font = '11px Inter,Arial';
 
     ctx.fillText(
-      'Latest: ' + last.toFixed(1),
+      'Latest: '+last.toFixed(1),
       pad,
       14
     );
@@ -1975,89 +1933,67 @@ function drawCharts() {
   );
 }
 
-function switchChart(which) {
-  activeChart = which;
-
-  $('tempChart').style.display =
-    which === 'temp' ? 'block' : 'none';
-
-  $('humChart').style.display =
-    which === 'hum' ? 'block' : 'none';
-
-  $('tabTemp').classList.toggle(
-    'active',
-    which === 'temp'
-  );
-
-  $('tabHum').classList.toggle(
-    'active',
-    which === 'hum'
-  );
-
-  drawCharts();
-}
-
 const EDGES = [
-  ['root', 'routerA'],
-  ['root', 'routerB'],
-  ['root', 'routerC'],
-  ['routerA', 'S1'],
-  ['routerA', 'S2'],
-  ['routerB', 'S3'],
-  ['routerB', 'S4'],
-  ['routerC', 'S5'],
-  ['routerC', 'S6']
+  ['root','routerA'],
+  ['root','routerB'],
+  ['root','routerC'],
+  ['routerA','S1'],
+  ['routerA','S2'],
+  ['routerB','S3'],
+  ['routerB','S4'],
+  ['routerC','S5'],
+  ['routerC','S6']
 ];
 
 function drawDodag() {
-  const {ctx, w, h} =
-    canvasContext('dodagCanvas');
+  const {ctx,w,h} = canvasCtx('dodagCanvas');
 
   const pos = {
-    root: [.5, .12],
-    routerA: [.18, .47],
-    routerB: [.5, .47],
-    routerC: [.82, .47],
-    S1: [.08, .84],
-    S2: [.29, .84],
-    S3: [.41, .84],
-    S4: [.59, .84],
-    S5: [.71, .84],
-    S6: [.92, .84]
+    root:[.5,.12],
+    routerA:[.18,.47],
+    routerB:[.5,.47],
+    routerC:[.82,.47],
+    S1:[.08,.84],
+    S2:[.29,.84],
+    S3:[.41,.84],
+    S4:[.59,.84],
+    S5:[.71,.84],
+    S6:[.92,.84]
   };
 
-  const point = id => [
-    w * pos[id][0],
-    h * pos[id][1]
+  const pt = id => [
+    w*pos[id][0],
+    h*pos[id][1]
   ];
 
   ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, w, h);
+  ctx.fillRect(0,0,w,h);
 
-  for (const [a, b] of EDGES) {
-    const p = point(a);
-    const q = point(b);
+  for (const [a,b] of EDGES) {
+    const p = pt(a);
+    const q = pt(b);
 
     ctx.beginPath();
     ctx.moveTo(...p);
     ctx.lineTo(...q);
 
-    ctx.strokeStyle = DOG[b].alive
-      ? '#a5b4fc'
-      : '#e2e8f0';
+    ctx.strokeStyle =
+      DOG[b].alive
+        ? '#a5b4fc'
+        : '#e2e8f0';
 
     ctx.lineWidth = 2;
     ctx.stroke();
   }
 
-  for (const [id, v] of Object.entries(DOG)) {
-    const [x, y] = point(id);
+  for (const [id,v] of Object.entries(DOG)) {
+    const [x,y] = pt(id);
     const isLeaf = id.startsWith('S');
 
     const color = !v.alive
       ? '#cbd5e1'
       : isLeaf
-        ? zoneFor(id).color
+        ? ZONES[NODE_ZONE[id]]?.color || '#888'
         : id === 'root'
           ? '#64748b'
           : '#8b5cf6';
@@ -2070,25 +2006,73 @@ function drawDodag() {
       y,
       isLeaf ? 16 : 19,
       0,
-      Math.PI * 2
+      Math.PI*2
     );
     ctx.fill();
 
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.font = 'bold 11px Inter,Arial';
-
-    ctx.fillText(id, x, y);
+    ctx.fillText(id,x,y);
 
     ctx.fillStyle = '#94a3b8';
     ctx.font = '10px Inter,Arial';
 
     ctx.fillText(
-      'rank ' + v.rank,
+      'rank '+v.rank,
       x,
-      y + 29
+      y+29
     );
+  }
+}
+
+function logMsg(kind,topic,text) {
+  logCount++;
+
+  $('msgCount').textContent =
+    logCount + ' msgs';
+
+  const row = document.createElement('div');
+
+  row.className =
+    'log-row ' + kind;
+
+  row.textContent =
+    new Date().toLocaleTimeString('en-GB') +
+    '  ' +
+    topic +
+    '  ' +
+    String(text).slice(0,150);
+
+  $('mqttLog').appendChild(row);
+
+  if ($('mqttLog').children.length>250) {
+    $('mqttLog').removeChild(
+      $('mqttLog').firstChild
+    );
+  }
+
+  $('mqttLog').scrollTop =
+    $('mqttLog').scrollHeight;
+}
+
+function addAlert(name,desc) {
+  const row = document.createElement('div');
+
+  row.className = 'alert-row';
+
+  row.textContent =
+    new Date().toLocaleTimeString('en-GB') +
+    '  ' +
+    name.toUpperCase() +
+    ': ' +
+    desc;
+
+  $('alertLog').prepend(row);
+
+  if ($('alertLog').children.length>80) {
+    $('alertLog').lastChild.remove();
   }
 }
 
@@ -2108,13 +2092,12 @@ drawCharts();
 drawDodag();
 connectBroker();
 
-setInterval(periodic, 1500);
+setInterval(periodic,1500);
 
-window.addEventListener('resize', () => {
+window.addEventListener('resize',() => {
   drawCharts();
   drawDodag();
 });
-
 </script>
 </body>
 </html>
