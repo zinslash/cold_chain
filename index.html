@@ -1411,6 +1411,10 @@ function refreshCounters() {
 /* UPDATE SENSOR READING */
 
 function updateNode(nid,temp,hum,breach) {
+
+  if (nid === "S1" && !DOG.S1.alive) {
+    markAlive("S1");
+}
   const tEl = document.getElementById("temp-"+nid);
   const hEl = document.getElementById("hum-"+nid);
   const sEl = document.getElementById("st-"+nid);
@@ -2464,6 +2468,24 @@ function connectBroker() {
 
         document.getElementById("tickPill").textContent =
           "tick: "+tick;
+
+
+if (nid === "S1") {
+
+    if (!DOG.S1.alive) {
+        markAlive("S1");
+    }
+
+    const confirmed =
+        data.controller === true &&
+        typeof data.request_id === "string" &&
+        data.request_id.length > 0 &&
+        typeof data.ok === "boolean";
+
+    onS1ControllerData(data, confirmed);
+}
+
+
 
         if (nid === "S1") {
           const hasResponseId =
