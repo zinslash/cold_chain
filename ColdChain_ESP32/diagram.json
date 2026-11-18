@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "author": "Nicolas Bamamou",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -18.9,
+      "left": 129,
+      "attrs": { "temperature": "-1.6", "humidity": "20.5" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 176.2,
+      "left": 171.95,
+      "rotate": 270,
+      "attrs": { "value": "10000" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "dht1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "dht1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "r1:2", "dht1:SDA", "green", [ "v-37.2", "h-47.89" ] ],
+    [ "r1:1", "esp:3V3", "red", [ "v9.6", "h-28.8", "v-62.3" ] ],
+    [ "esp:D4", "r1:2", "green", [ "h23.5", "v14.4", "h76.8" ] ]
+  ],
+  "dependencies": {}
+}
