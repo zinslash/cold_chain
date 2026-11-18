@@ -1,0 +1,10 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pio/
+.idea/
+logs/
+.env
+*.key
+*.pem

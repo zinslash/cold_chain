@@ -2,85 +2,49 @@
 import csv
 import json
 import math
-import os
 import random
+import socket
 import threading
 import time
 import uuid
+from pathlib import Path
 
 try:
     import paho.mqtt.client as mqtt
 except ImportError:
-    raise SystemExit("Install MQTT: python -m pip install paho-mqtt")
+    raise SystemExit("Install MQTT first: python -m pip install paho-mqtt")
 
-
-BROKER = os.getenv(
-    "COLDCHAIN_MQTT_HOST",
-    "broker.hivemq.com"
-)
-
-PORT = int(
-    os.getenv("COLDCHAIN_MQTT_PORT", "1883")
-)
-
-WOKWI_S1_ROOT = os.getenv(
-    "COLDCHAIN_WOKWI_S1_ROOT",
-    "coldchain/zoneA/S1"
-).strip("/")
-
-WOKWI_S1_TEMP_TOPIC = (
-    f"{WOKWI_S1_ROOT}/temperature"
-)
-
-WOKWI_S1_STATUS_TOPIC = (
-    f"{WOKWI_S1_ROOT}/status"
-)
-
-SIMULATED_TEMP_FILTER = (
-    "coldchain/+/+/temperature"
-)
+BROKER = "127.0.0.1"
+PORT = 1883
+WOKWI_S1_ROOT = "coldchain/lab-7b39f2/zoneA/S1"
+WOKWI_S1_TEMP_TOPIC = f"{WOKWI_S1_ROOT}/temperature"
+SIMULATED_TEMP_FILTER = "coldchain/+/+/temperature"
+LOG_FILE = Path(__file__).resolve().parent / "logs" / "readings.csv"
 
 THRESHOLDS = {
-    "zoneA": {
-        "lo": -25,
-        "hi": -15,
-        "opt": -18
-    },
-    "zoneB": {
-        "lo": 0,
-        "hi": 5,
-        "opt": 2
-    },
-    "zoneC": {
-        "lo": 2,
-        "hi": 8,
-        "opt": 5
-    }
+    "zoneA": {"lo": -25, "hi": -15, "opt": -18},
+    "zoneB": {"lo": 0, "hi": 5, "opt": 2},
+    "zoneC": {"lo": 2, "hi": 8, "opt": 5},
 }
 
 NODE_ZONES = {
-    "S1": "zoneA",
-    "S2": "zoneA",
-    "S3": "zoneB",
-    "S4": "zoneB",
-    "S5": "zoneC",
-    "S6": "zoneC"
+    "S1": "zoneA", "S2": "zoneA", "S3": "zoneB",
+    "S4": "zoneB", "S5": "zoneC", "S6": "zoneC",
 }
 
-BASE_TEMPS = {
-    "S2": -20,
-    "S3": 2,
-    "S4": 4,
-    "S5": 6,
-    "S6": 6
-}
+BASE_TEMPS = {"S2": -20, "S3": 2, "S4": 4, "S5": 6, "S6": 6}
+
+SENSOR_CONFIGS = [
+    ("S2", "zoneA", -20, (-25, -15), -18),
+    ("S3", "zoneB", 2, (0, 5), 2),
+    ("S4", "zoneB", 4, (0, 5), 2),
+    ("S5", "zoneC", 6, (2, 8), 5),
+    ("S6", "zoneC", 6, (2, 8), 5),
+]
 
 
 def make_mqtt_client(label):
-
-    client_id = (
-        f"{label}_{uuid.uuid4().hex[:10]}"
-    )
+    client_id = f"{label}_{uuid.uuid4().hex[:10]}"
 
     if hasattr(mqtt, "CallbackAPIVersion"):
         return mqtt.Client(
@@ -88,63 +52,55 @@ def make_mqtt_client(label):
             client_id=client_id
         )
 
-    return mqtt.Client(
-        client_id=client_id
-    )
+    return mqtt.Client(client_id=client_id)
 
 
-def is_sensor_telemetry(topic, data):
+def connect_client(client):
+    client.reconnect_delay_set(min_delay=1, max_delay=10)
 
-    if not isinstance(data, dict):
-        return False
+    try:
+        client.connect(BROKER, PORT, keepalive=60)
+    except OSError as exc:
+        raise RuntimeError(
+            f"Cannot connect to local Mosquitto at {BROKER}:{PORT}. "
+            "Start Mosquitto before running main.py."
+        ) from exc
 
-    nid = data.get("node")
-    zone = data.get("zone")
-    temp = data.get("temp")
-
-    if (
-        nid not in NODE_ZONES
-        or zone != NODE_ZONES[nid]
-    ):
-        return False
-
-    if (
-        isinstance(temp, bool)
-        or not isinstance(temp, (int, float))
-        or not math.isfinite(temp)
-    ):
-        return False
-
-    if nid == "S1":
-        return (
-            topic == WOKWI_S1_TEMP_TOPIC
-            and data.get("controller") is True
-        )
-
-    return (
-        topic ==
-        f"coldchain/{zone}/{nid}/temperature"
-    )
+    client.loop_start()
 
 
 def subscribe_sensor_topics(client):
+    client.subscribe(SIMULATED_TEMP_FILTER, qos=0)
+    client.subscribe(WOKWI_S1_TEMP_TOPIC, qos=0)
 
-    client.subscribe(
-        SIMULATED_TEMP_FILTER,
-        qos=0
-    )
 
-    if WOKWI_S1_TEMP_TOPIC != (
-        "coldchain/zoneA/S1/temperature"
-    ):
-        client.subscribe(
-            WOKWI_S1_TEMP_TOPIC,
-            qos=0
+def is_sensor_telemetry(topic, payload):
+    if not isinstance(payload, dict):
+        return False
+
+    node = payload.get("node")
+    zone = payload.get("zone")
+    temp = payload.get("temp")
+
+    if node not in NODE_ZONES or zone != NODE_ZONES[node]:
+        return False
+
+    if isinstance(temp, bool) or not isinstance(temp, (int, float)):
+        return False
+
+    if not math.isfinite(temp):
+        return False
+
+    if node == "S1":
+        return (
+            topic == WOKWI_S1_TEMP_TOPIC
+            and payload.get("controller") is True
         )
+
+    return topic == f"coldchain/{zone}/{node}/temperature"
 
 
 class SensorNode(threading.Thread):
-
     def __init__(
         self,
         node_id,
@@ -153,25 +109,30 @@ class SensorNode(threading.Thread):
         temp_range,
         optimum
     ):
-
-        super().__init__(daemon=True)
+        super().__init__(
+            daemon=True,
+            name=f"Sensor-{node_id}"
+        )
 
         self.node_id = node_id
         self.zone = zone
         self.base_temp = float(base_temp)
         self.temp_range = temp_range
         self.optimum = optimum
-
         self.cooling = False
         self.heating = False
-        self.running = True
-
-        self.client = make_mqtt_client(
-            f"sensor_{node_id}"
-        )
+        self.stop_event = threading.Event()
 
         self.status_topic = (
             f"coldchain/{zone}/{node_id}/status"
+        )
+
+        self.temperature_topic = (
+            f"coldchain/{zone}/{node_id}/temperature"
+        )
+
+        self.client = make_mqtt_client(
+            f"sensor_{node_id}"
         )
 
         self.client.will_set(
@@ -181,32 +142,48 @@ class SensorNode(threading.Thread):
             retain=True
         )
 
+        self.client.on_connect = self.on_connect
         self.client.on_message = self.on_control
 
-        self.client.connect(
-            BROKER,
-            PORT,
-            keepalive=60
-        )
+        connect_client(self.client)
 
-        self.client.subscribe(
-            f"coldchain/control/+/{zone}",
-            qos=1
-        )
-
-        self.client.loop_start()
-
-    def on_control(
+    def on_connect(
         self,
         client,
         userdata,
-        message
+        flags,
+        reason_code,
+        properties=None
     ):
+        if reason_code != 0:
+            print(
+                f"[{self.node_id}] "
+                f"MQTT connection refused: {reason_code}"
+            )
+            return
 
+        client.subscribe(
+            f"coldchain/control/+/{self.zone}",
+            qos=1
+        )
+
+        client.publish(
+            self.status_topic,
+            "online",
+            qos=1,
+            retain=True
+        )
+
+        print(
+            f"[{self.node_id}] "
+            "Connected to local Mosquitto"
+        )
+
+    def on_control(self, client, userdata, message):
         command = message.payload.decode(
             "utf-8",
             errors="replace"
-        )
+        ).strip()
 
         if command == "cooling:ON":
             self.cooling = True
@@ -223,26 +200,18 @@ class SensorNode(threading.Thread):
             self.heating = False
 
     def run(self):
-
-        self.client.publish(
-            self.status_topic,
-            "online",
-            qos=1,
-            retain=True
-        )
-
         try:
-
-            while self.running:
+            while not self.stop_event.is_set():
+                if not self.client.is_connected():
+                    self.stop_event.wait(0.5)
+                    continue
 
                 if self.cooling:
-
                     self.base_temp -= (
                         0.3 + random.uniform(0, 0.05)
                     )
 
                     if self.base_temp <= self.optimum:
-
                         self.cooling = False
 
                         self.client.publish(
@@ -252,13 +221,11 @@ class SensorNode(threading.Thread):
                         )
 
                 elif self.heating:
-
                     self.base_temp += (
                         0.3 + random.uniform(0, 0.05)
                     )
 
                     if self.base_temp >= self.optimum:
-
                         self.heating = False
 
                         self.client.publish(
@@ -268,15 +235,12 @@ class SensorNode(threading.Thread):
                         )
 
                 else:
-
                     self.base_temp += (
-                        0.12 +
-                        random.uniform(-0.05, 0.08)
+                        0.12 + random.uniform(-0.05, 0.08)
                     )
 
                 temp = round(
-                    self.base_temp +
-                    random.uniform(-0.3, 0.3),
+                    self.base_temp + random.uniform(-0.3, 0.3),
                     2
                 )
 
@@ -290,53 +254,52 @@ class SensorNode(threading.Thread):
                     "zone": self.zone,
                     "temp": temp,
                     "hum": humidity,
-                    "ts": int(time.time())
+                    "ts": int(time.time()),
                 })
 
-                self.client.publish(
-                    f"coldchain/{self.zone}/{self.node_id}/temperature",
+                info = self.client.publish(
+                    self.temperature_topic,
                     payload,
                     qos=0
                 )
 
-                print(
-                    f"[{self.node_id}] "
-                    f"{temp:.2f} C | "
-                    f"Humidity {humidity:.1f}%"
-                )
+                if info.rc == mqtt.MQTT_ERR_SUCCESS:
+                    print(
+                        f"[{self.node_id}] "
+                        f"{temp:.2f} C | "
+                        f"Humidity {humidity:.1f}%"
+                    )
+                else:
+                    print(
+                        f"[{self.node_id}] "
+                        f"Publish failed, MQTT code {info.rc}"
+                    )
 
-                for _ in range(50):
-
-                    if not self.running:
-                        break
-
-                    time.sleep(0.1)
+                self.stop_event.wait(5)
 
         finally:
+            if self.client.is_connected():
+                result = self.client.publish(
+                    self.status_topic,
+                    "offline",
+                    qos=1,
+                    retain=True
+                )
 
-            self.client.publish(
-                self.status_topic,
-                "offline",
-                qos=1,
-                retain=True
-            )
+                try:
+                    result.wait_for_publish(timeout=1)
+                except (RuntimeError, ValueError):
+                    pass
 
             self.client.disconnect()
             self.client.loop_stop()
 
     def kill(self):
-        self.running = False
+        self.stop_event.set()
 
 
 class DODAGNode:
-
-    def __init__(
-        self,
-        node_id,
-        rank,
-        parent=None
-    ):
-
+    def __init__(self, node_id, rank, parent=None):
         self.node_id = node_id
         self.rank = rank
         self.parent = parent
@@ -345,9 +308,7 @@ class DODAGNode:
 
 
 class DODAG:
-
     def __init__(self):
-
         specs = {
             "root": (1, None),
             "routerA": (2, "root"),
@@ -358,62 +319,44 @@ class DODAG:
             "S3": (3, "routerB"),
             "S4": (3, "routerB"),
             "S5": (3, "routerC"),
-            "S6": (3, "routerC")
+            "S6": (3, "routerC"),
         }
 
         self.nodes = {
-            nid: DODAGNode(nid, rank, parent)
-            for nid, (rank, parent) in specs.items()
+            node_id: DODAGNode(node_id, rank, parent)
+            for node_id, (rank, parent) in specs.items()
         }
 
-        for nid, node in self.nodes.items():
-
+        for node_id, node in self.nodes.items():
             if node.parent:
-
-                self.nodes[
-                    node.parent
-                ].children.append(nid)
+                self.nodes[node.parent].children.append(node_id)
 
         print(
-            "[DODAG] Topology created; "
-            "S1 is the external Wokwi node"
+            "[DODAG] S1 is external Wokwi; "
+            "S2-S6 are Python sensors"
         )
 
-    def kill_node(self, nid):
+    def kill_node(self, node_id):
+        if node_id in self.nodes:
+            self.nodes[node_id].alive = False
+            print(f"[DODAG] {node_id} marked offline")
 
-        if nid in self.nodes:
-
-            self.nodes[nid].alive = False
-
-            print(
-                f"[DODAG] {nid} marked offline"
-            )
-
-    def revive_node(self, nid):
-
-        if nid in self.nodes:
-
-            self.nodes[nid].alive = True
-
-            print(
-                f"[DODAG] {nid} rejoined"
-            )
+    def revive_node(self, node_id):
+        if node_id in self.nodes:
+            self.nodes[node_id].alive = True
+            print(f"[DODAG] {node_id} rejoined")
 
     def print_tree(self):
-
-        def show(nid, depth=0):
-
-            node = self.nodes[nid]
+        def show(node_id, depth=0):
+            node = self.nodes[node_id]
 
             status = (
-                "online"
-                if node.alive
-                else "offline"
+                "online" if node.alive else "offline"
             )
 
             print(
                 " " * depth +
-                f"{nid} | rank={node.rank} | {status}"
+                f"{node_id} | rank={node.rank} | {status}"
             )
 
             for child in node.children:
@@ -423,7 +366,6 @@ class DODAG:
 
 
 class DODAGVisualizer:
-
     POS = {
         "root": (0.50, 0.95),
         "routerA": (0.17, 0.65),
@@ -434,57 +376,45 @@ class DODAGVisualizer:
         "S3": (0.42, 0.30),
         "S4": (0.58, 0.30),
         "S5": (0.74, 0.30),
-        "S6": (0.92, 0.30)
+        "S6": (0.92, 0.30),
     }
 
     def __init__(self, dodag):
         self.dodag = dodag
 
     def animate(self):
-
         try:
             import networkx as nx
             import matplotlib.pyplot as plt
             from matplotlib.animation import FuncAnimation
-
         except ImportError:
-
             print(
                 "Install visualization: "
-                "python -m pip install "
-                "networkx matplotlib"
+                "python -m pip install networkx matplotlib"
             )
             return
 
-        fig, ax = plt.subplots(
-            figsize=(10, 6)
-        )
+        fig, ax = plt.subplots(figsize=(10, 6))
 
         def draw(frame):
-
             ax.clear()
-
             graph = nx.DiGraph()
 
-            for nid, node in self.dodag.nodes.items():
-
-                graph.add_node(nid)
+            for node_id, node in self.dodag.nodes.items():
+                graph.add_node(node_id)
 
                 if node.parent:
-                    graph.add_edge(
-                        nid,
-                        node.parent
-                    )
+                    graph.add_edge(node_id, node.parent)
 
             colors = [
                 "#f09595"
-                if not self.dodag.nodes[n].alive
+                if not self.dodag.nodes[node_id].alive
                 else "#888780"
-                if self.dodag.nodes[n].rank == 1
+                if self.dodag.nodes[node_id].rank == 1
                 else "#afa9ec"
-                if self.dodag.nodes[n].rank == 2
+                if self.dodag.nodes[node_id].rank == 2
                 else "#9fe1cb"
-                for n in graph.nodes
+                for node_id in graph.nodes
             ]
 
             nx.draw(
@@ -499,10 +429,10 @@ class DODAGVisualizer:
             )
 
             ax.set_title(
-                "Cold Chain DODAG — S1 from Wokwi"
+                "Cold Chain DODAG - S1 from Wokwi"
             )
 
-        animation_handle = FuncAnimation(
+        animation = FuncAnimation(
             fig,
             draw,
             interval=3000,
@@ -512,96 +442,92 @@ class DODAGVisualizer:
         draw(0)
         plt.show()
 
-        return animation_handle
+        return animation
 
 
 class AlertEngine:
-
     def __init__(self):
-
         self.active = {}
 
         self.client = make_mqtt_client(
             "alert_engine"
         )
 
+        self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
 
-        self.client.connect(
-            BROKER,
-            PORT,
-            keepalive=60
-        )
-
-        subscribe_sensor_topics(
-            self.client
-        )
+        connect_client(self.client)
 
         print(
-            "[AlertEngine] Monitoring "
-            "S1 (Wokwi) and S2-S6 (Python)"
+            "[AlertEngine] Monitoring Wokwi S1 "
+            "and Python S2-S6"
         )
 
-    def on_message(
+    def on_connect(
         self,
         client,
         userdata,
-        msg
+        flags,
+        reason_code,
+        properties=None
     ):
+        if reason_code == 0:
+            subscribe_sensor_topics(client)
+        else:
+            print(
+                "[AlertEngine] MQTT connection refused: "
+                f"{reason_code}"
+            )
 
+    def on_message(self, client, userdata, message):
         try:
-            data = json.loads(msg.payload)
-
+            payload = json.loads(message.payload)
         except (ValueError, TypeError):
             return
 
         if not is_sensor_telemetry(
-            msg.topic,
-            data
+            message.topic,
+            payload
         ):
             return
 
-        zone = data["zone"]
-        nid = data["node"]
-        temp = data["temp"]
+        zone = payload["zone"]
+        node = payload["node"]
+        temp = payload["temp"]
 
-        cfg = THRESHOLDS[zone]
+        thresholds = THRESHOLDS[zone]
+        previous = self.active.get(node)
 
-        previous = self.active.get(nid)
-
-        if temp > cfg["hi"]:
+        if temp > thresholds["hi"]:
             kind = "cooling"
 
-        elif temp < cfg["lo"]:
+        elif temp < thresholds["lo"]:
             kind = "heating"
 
         else:
             kind = None
 
         if kind is None:
-
             if previous:
-
                 duration = round(
                     time.time() - previous["start"],
                     1
                 )
 
-                self.active.pop(nid, None)
+                self.active.pop(node, None)
 
                 self.client.publish(
                     "coldchain/alerts/recover",
                     json.dumps({
-                        "node": nid,
+                        "node": node,
                         "zone": zone,
                         "temp": temp,
-                        "duration_s": duration
+                        "duration_s": duration,
                     }),
                     qos=1
                 )
 
-                if nid != "S1":
-
+                if node != "S1":
                     self.client.publish(
                         f"coldchain/control/{previous['kind']}/{zone}",
                         f"{previous['kind']}:OFF",
@@ -609,31 +535,26 @@ class AlertEngine:
                     )
 
                 print(
-                    f"[RECOVER] {nid} "
-                    f"({zone}) safe again"
+                    f"[RECOVER] {node} ({zone}) safe again"
                 )
 
             return
 
-        if (
-            previous
-            and previous["kind"] == kind
-        ):
+        if previous and previous["kind"] == kind:
             return
 
         if (
             previous
             and previous["kind"] != kind
-            and nid != "S1"
+            and node != "S1"
         ):
-
             self.client.publish(
                 f"coldchain/control/{previous['kind']}/{zone}",
                 f"{previous['kind']}:OFF",
                 qos=1
             )
 
-        self.active[nid] = {
+        self.active[node] = {
             "kind": kind,
             "start": time.time()
         }
@@ -641,22 +562,21 @@ class AlertEngine:
         self.client.publish(
             "coldchain/alerts/breach",
             json.dumps({
-                "node": nid,
+                "node": node,
                 "zone": zone,
                 "temp": temp,
                 "type": kind.upper(),
                 "range": [
-                    cfg["lo"],
-                    cfg["hi"]
+                    thresholds["lo"],
+                    thresholds["hi"]
                 ],
-                "optimum": cfg["opt"],
-                "ts": int(time.time())
+                "optimum": thresholds["opt"],
+                "ts": int(time.time()),
             }),
             qos=1
         )
 
-        if nid != "S1":
-
+        if node != "S1":
             self.client.publish(
                 f"coldchain/control/{kind}/{zone}",
                 f"{kind}:ON",
@@ -664,35 +584,31 @@ class AlertEngine:
             )
 
         print(
-            f"[ALERT] {nid} {zone}: "
+            f"[ALERT] {node} {zone}: "
             f"{temp} C ({kind})"
         )
 
-    def start(self):
-        self.client.loop_forever()
+    def stop(self):
+        self.client.disconnect()
+        self.client.loop_stop()
 
 
 class DataLogger:
-
     def __init__(self):
+        self.log_file = LOG_FILE
 
-        os.makedirs(
-            "logs",
+        self.log_file.parent.mkdir(
+            parents=True,
             exist_ok=True
         )
 
-        self.log_file = "logs/readings.csv"
-
-        if not os.path.exists(self.log_file):
-
-            with open(
-                self.log_file,
+        if not self.log_file.exists():
+            with self.log_file.open(
                 "w",
                 newline="",
                 encoding="utf-8"
-            ) as f:
-
-                csv.writer(f).writerow([
+            ) as file:
+                csv.writer(file).writerow([
                     "timestamp",
                     "node",
                     "zone",
@@ -705,57 +621,59 @@ class DataLogger:
             "logger"
         )
 
+        self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
 
-        self.client.connect(
-            BROKER,
-            PORT,
-            keepalive=60
-        )
-
-        subscribe_sensor_topics(
-            self.client
-        )
-
-        self.client.subscribe(
-            "coldchain/alerts/#",
-            qos=0
-        )
+        connect_client(self.client)
 
         print(
-            "[DataLogger] Logging "
-            "S1-S6 data to logs/readings.csv"
+            f"[DataLogger] Writing readings to "
+            f"{self.log_file}"
         )
 
-    def on_message(
+    def on_connect(
         self,
         client,
         userdata,
-        msg
+        flags,
+        reason_code,
+        properties=None
     ):
+        if reason_code == 0:
+            subscribe_sensor_topics(client)
 
+            client.subscribe(
+                "coldchain/alerts/#",
+                qos=0
+            )
+        else:
+            print(
+                "[DataLogger] MQTT connection refused: "
+                f"{reason_code}"
+            )
+
+    def on_message(self, client, userdata, message):
         try:
-            data = json.loads(msg.payload)
-
+            payload = json.loads(message.payload)
         except (ValueError, TypeError):
             return
 
-        if not isinstance(data, dict):
+        if not isinstance(payload, dict):
             return
 
-        is_reading = msg.topic.endswith(
+        is_reading = message.topic.endswith(
             "/temperature"
         )
 
         if is_reading and not is_sensor_telemetry(
-            msg.topic,
-            data
+            message.topic,
+            payload
         ):
             return
 
         if (
             not is_reading
-            and not msg.topic.startswith(
+            and not message.topic.startswith(
                 "coldchain/alerts/"
             )
         ):
@@ -763,106 +681,83 @@ class DataLogger:
 
         event = (
             "breach"
-            if "/breach" in msg.topic
+            if "/breach" in message.topic
             else "recover"
-            if "/recover" in msg.topic
+            if "/recover" in message.topic
             else "reading"
         )
 
-        with open(
-            self.log_file,
+        with self.log_file.open(
             "a",
             newline="",
             encoding="utf-8"
-        ) as f:
-
-            csv.writer(f).writerow([
-                time.strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                ),
-                data.get("node", ""),
-                data.get("zone", ""),
-                data.get("temp", ""),
-                data.get("hum", ""),
+        ) as file:
+            csv.writer(file).writerow([
+                time.strftime("%Y-%m-%d %H:%M:%S"),
+                payload.get("node", ""),
+                payload.get("zone", ""),
+                payload.get("temp", ""),
+                payload.get("hum", ""),
                 event
             ])
 
-    def start(self):
-        self.client.loop_forever()
+    def stop(self):
+        self.client.disconnect()
+        self.client.loop_stop()
 
 
 def main():
-
     print("=" * 56)
-    print("COLD CHAIN TEMPERATURE REGULATOR")
-
-    print(
-        f"MQTT broker: {BROKER}:{PORT}"
-    )
-
-    print(
-        f"Wokwi S1 topic: "
-        f"{WOKWI_S1_TEMP_TOPIC}"
-    )
-
-    print(
-        "S1 comes from Wokwi; "
-        "Python simulates S2-S6"
-    )
-
+    print("COLD CHAIN - LOCAL MQTT TEMPERATURE REGULATOR")
+    print(f"Mosquitto broker: {BROKER}:{PORT}")
+    print("Dashboard WebSocket: ws://127.0.0.1:9001/mqtt")
+    print(f"Wokwi S1 telemetry: {WOKWI_S1_TEMP_TOPIC}")
+    print("Python publishes only S2-S6; S1 is controlled by Wokwi")
     print("=" * 56)
+
+    try:
+        with socket.create_connection(
+            (BROKER, PORT),
+            timeout=3
+        ):
+            pass
+
+    except OSError:
+        raise SystemExit(
+            f"Mosquitto is not reachable on {BROKER}:{PORT}. "
+            "Start your local broker first."
+        )
 
     dodag = DODAG()
     dodag.print_tree()
 
-    configs = [
-        ("S2", "zoneA", -20, (-25, -15), -18),
-        ("S3", "zoneB", 2, (0, 5), 2),
-        ("S4", "zoneB", 4, (0, 5), 2),
-        ("S5", "zoneC", 6, (2, 8), 5),
-        ("S6", "zoneC", 6, (2, 8), 5)
-    ]
-
     nodes = {}
-
-    for args in configs:
-
-        node = SensorNode(*args)
-
-        nodes[node.node_id] = node
-
-        node.start()
-
-    print(
-        f"[main] Started "
-        f"{len(nodes)} Python sensor nodes"
-    )
-
-    alert_engine = AlertEngine()
-    logger = DataLogger()
-
-    threading.Thread(
-        target=alert_engine.start,
-        daemon=True
-    ).start()
-
-    threading.Thread(
-        target=logger.start,
-        daemon=True
-    ).start()
-
-    print(
-        "Commands: breach | kill S5 | "
-        "revive S5 | tree | plot | quit"
-    )
+    alert_engine = None
+    logger = None
 
     try:
+        alert_engine = AlertEngine()
+        logger = DataLogger()
+
+        for config in SENSOR_CONFIGS:
+            node = SensorNode(*config)
+
+            nodes[node.node_id] = node
+            node.start()
+
+        print(
+            f"[main] Started {len(nodes)} "
+            "Python sensors (S2-S6)"
+        )
+
+        print(
+            "Commands: breach | kill S5 | "
+            "revive S5 | tree | plot | quit"
+        )
 
         while True:
-
             try:
                 parts = input("> ").strip().split()
-
             except EOFError:
                 break
 
@@ -872,80 +767,73 @@ def main():
             command = parts[0].lower()
 
             if command == "breach":
-
                 if "S6" in nodes:
-
                     nodes["S6"].base_temp = 14
 
                     print(
-                        "S6 moved to 14 C "
+                        "S6 set to 14 C "
                         "to trigger a breach"
+                    )
+                else:
+                    print(
+                        "S6 is offline; revive S6 first"
                     )
 
             elif command in ("kill", "revive"):
-
                 if len(parts) != 2:
+                    print(f"Usage: {command} S2")
+                    continue
 
+                node_id = parts[1].upper()
+
+                if node_id == "S1":
                     print(
-                        f"Usage: {command} S2"
+                        "S1 runs in Wokwi; "
+                        "manage it there"
                     )
                     continue
 
-                nid = parts[1].upper()
-
-                if nid == "S1":
-
-                    print(
-                        "S1 is controlled by Wokwi; "
-                        "manage it in Wokwi"
-                    )
-                    continue
-
-                if nid not in BASE_TEMPS:
-
+                if node_id not in BASE_TEMPS:
                     print(
                         "Unknown sensor; use S2-S6"
                     )
                     continue
 
-                if command == "kill":
+                if (
+                    command == "kill"
+                    and node_id in nodes
+                ):
+                    old = nodes.pop(node_id)
+                    old.kill()
+                    old.join(timeout=3)
 
-                    if nid in nodes:
+                    dodag.kill_node(node_id)
 
-                        nodes.pop(nid).kill()
-                        dodag.kill_node(nid)
-
-                elif nid not in nodes:
-
-                    zone = NODE_ZONES[nid]
+                elif (
+                    command == "revive"
+                    and node_id not in nodes
+                ):
+                    zone = NODE_ZONES[node_id]
                     cfg = THRESHOLDS[zone]
 
                     new_node = SensorNode(
-                        nid,
+                        node_id,
                         zone,
-                        BASE_TEMPS[nid],
-                        (
-                            cfg["lo"],
-                            cfg["hi"]
-                        ),
+                        BASE_TEMPS[node_id],
+                        (cfg["lo"], cfg["hi"]),
                         cfg["opt"]
                     )
 
-                    nodes[nid] = new_node
-
+                    nodes[node_id] = new_node
                     new_node.start()
 
-                    dodag.revive_node(nid)
+                    dodag.revive_node(node_id)
 
             elif command == "tree":
-
                 dodag.print_tree()
 
             elif command == "plot":
-
-                DODAGVisualizer(
-                    dodag
-                ).animate()
+                DODAGVisualizer(dodag).animate()
 
             elif command == "quit":
                 break
@@ -960,16 +848,19 @@ def main():
         pass
 
     finally:
-
-        print(
-            "Stopping Python sensor nodes..."
-        )
+        print("Stopping Python sensors...")
 
         for node in nodes.values():
             node.kill()
 
         for node in nodes.values():
-            node.join(timeout=2)
+            node.join(timeout=3)
+
+        if alert_engine is not None:
+            alert_engine.stop()
+
+        if logger is not None:
+            logger.stop()
 
         print(
             "Stopped. Wokwi S1 runs independently."

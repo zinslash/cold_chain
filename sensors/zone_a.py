@@ -2,8 +2,7 @@
 from sensors.base_node import SensorNode
 
 
-def create_zone_a_nodes(broker="broker.hivemq.com"):
-
+def create_zone_a_nodes(broker="127.0.0.1"):
     s2 = SensorNode(
         "S2",
         "zoneA",

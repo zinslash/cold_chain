@@ -4,78 +4,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ColdChain | Live Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+<title>ColdChain | Local Dashboard</title>
 
+<style>
 :root {
   --bg:#f0f2f5;
   --card:#fff;
-  --light:#f7f8fa;
-  --border:#e8eaee;
-  --text:#1a1d23;
-  --muted:#7a8494;
+  --sub:#f7f8fa;
+  --line:#e7eaf0;
+  --text:#18212d;
+  --muted:#7c8797;
   --blue:#2563eb;
   --cyan:#0891b2;
   --orange:#d97706;
   --green:#16a34a;
   --red:#dc2626;
-  --shadow:0 2px 15px #11182711;
 }
 
-* {box-sizing:border-box}
+* { box-sizing:border-box; }
 
 body {
   margin:0;
   background:var(--bg);
   color:var(--text);
-  font:13px Inter,Arial,sans-serif;
+  font:13px system-ui,"Segoe UI",Arial,sans-serif;
 }
 
-button,input {font:inherit}
-button {cursor:pointer}
+button,input { font:inherit; }
+button { cursor:pointer; }
+button:disabled { opacity:.5;cursor:not-allowed; }
 
 nav {
-  background:#fff;
-  border-bottom:1px solid var(--border);
   height:62px;
-  display:flex;
-  align-items:center;
-  padding:0 25px;
-  gap:30px;
   position:sticky;
   top:0;
   z-index:5;
+  background:white;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  padding:0 24px;
+  gap:30px;
 }
 
-.logo {
-  font-size:18px;
-  font-weight:700;
+.brand {
+  font-size:17px;
+  font-weight:750;
   white-space:nowrap;
 }
 
-.logo i {
-  font-style:normal;
+.brand i {
   background:var(--blue);
-  color:#fff;
+  color:white;
+  border-radius:9px;
   padding:8px;
-  border-radius:8px;
+  font-style:normal;
   margin-right:9px;
 }
 
-.navlinks {
+.links {
   display:flex;
-  gap:25px;
+  gap:27px;
   color:var(--muted);
 }
 
-.navlinks strong {
+.links strong {
   color:var(--blue);
+  border-bottom:2px solid var(--blue);
   height:62px;
   display:flex;
   align-items:center;
-  border-bottom:2px solid var(--blue);
 }
 
 .navright {
@@ -88,54 +86,52 @@ nav {
 }
 
 .pill {
-  background:#fff7e4;
-  color:#a66d07;
-  padding:6px 11px;
+  display:inline-block;
+  padding:6px 10px;
   border-radius:20px;
-  font-weight:700;
+  background:#fff5df;
+  color:#a86b00;
   font-size:10px;
+  font-weight:700;
 }
 
 .pill.good {
-  background:#e9f9ee;
+  background:#e8faef;
   color:var(--green);
 }
 
 .pill.bad {
-  background:#feecec;
+  background:#fff0f0;
   color:var(--red);
 }
 
 main {
   max-width:1200px;
+  padding:27px 20px 60px;
   margin:auto;
-  padding:28px 20px 60px;
 }
 
-h2 {
-  font-size:18px;
-  margin:0 0 16px;
-}
+h2 { font-size:18px;margin:0 0 15px; }
 
 h2 small {
   font-size:12px;
   font-weight:400;
+  margin-left:8px;
   color:var(--muted);
-  margin-left:7px;
 }
 
 .stats,.zones {
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:16px;
-  margin-bottom:26px;
+  gap:15px;
+  margin-bottom:25px;
 }
 
 .card {
-  background:#fff;
+  background:var(--card);
+  border-radius:15px;
   padding:20px;
-  border-radius:16px;
-  box-shadow:var(--shadow);
+  box-shadow:0 3px 15px #17243a0d;
 }
 
 .stat-head {
@@ -145,50 +141,46 @@ h2 small {
 }
 
 .stat-count {
-  font-size:38px;
+  font-size:37px;
   font-weight:300;
 }
 
-.stat-track {
+.track {
   height:5px;
-  background:#edf0f3;
-  border-radius:6px;
-  margin:20px 0 5px;
-}
-
-.stat-track div {
-  height:100%;
-  border-radius:6px;
-  transition:width .3s;
-}
-
-.muted {
-  color:var(--muted);
-  font-size:11px;
-}
-
-.banner {
-  background:linear-gradient(115deg,#1e53cf,#0897b5);
-  border-radius:16px;
-  color:#fff;
-  display:grid;
-  grid-template-columns:265px 1fr;
-  margin-bottom:24px;
-  min-height:240px;
+  background:#edf0f4;
+  margin-top:19px;
+  border-radius:7px;
   overflow:hidden;
 }
 
-.banner-info {padding:34px}
+.track div {
+  height:100%;
+  transition:width .3s;
+}
+
+.muted { font-size:11px;color:var(--muted); }
+
+.banner {
+  display:grid;
+  grid-template-columns:265px 1fr;
+  min-height:240px;
+  border-radius:16px;
+  overflow:hidden;
+  background:linear-gradient(115deg,#1d55d0,#0899b5);
+  color:#fff;
+  margin-bottom:24px;
+}
+
+.banner-info { padding:32px; }
 
 .banner-temp {
-  font-size:68px;
+  font-size:69px;
   font-weight:300;
-  line-height:1.35;
 }
 
 .banner-info small {
   font-size:11px;
-  opacity:.75;
+  opacity:.78;
 }
 
 #overviewCanvas {
@@ -198,23 +190,23 @@ h2 small {
 
 .toolbar {
   display:flex;
-  gap:9px;
   flex-wrap:wrap;
-  margin:0 0 28px;
+  gap:8px;
+  margin-bottom:27px;
 }
 
 .btn {
-  background:#fff;
-  color:#536174;
-  border:1px solid var(--border);
+  padding:10px 14px;
+  border:1px solid var(--line);
   border-radius:8px;
-  padding:10px 16px;
-  box-shadow:var(--shadow);
+  background:#fff;
+  color:#566478;
+  box-shadow:0 2px 10px #1118270c;
 }
 
 .btn:hover {
-  color:var(--blue);
   border-color:var(--blue);
+  color:var(--blue);
 }
 
 .regulator {
@@ -222,8 +214,8 @@ h2 small {
   grid-template-columns:1fr 1.18fr;
   gap:22px;
   border-top:3px solid var(--blue);
-  margin-bottom:30px;
   padding:24px;
+  margin-bottom:28px;
 }
 
 .reg-left {
@@ -234,40 +226,47 @@ h2 small {
 }
 
 .reg-right {
-  border-left:1px solid var(--border);
+  border-left:1px solid var(--line);
   padding-left:22px;
 }
 
 .s1temp {
-  font-size:55px;
+  font-size:54px;
   font-weight:300;
   color:var(--blue);
   margin:12px 0 0;
 }
 
-.s1temp small {font-size:21px}
+.s1temp small { font-size:20px; }
 
 .ctrl-grid {
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:7px;
 }
 
 .ctrl-detail {
-  background:var(--light);
-  border-radius:9px;
   padding:10px;
+  border-radius:9px;
+  background:var(--sub);
 }
 
 .ctrl-detail small {
-  font-size:9px;
   color:var(--muted);
+  font-size:9px;
 }
 
 .ctrl-detail b {
-  display:block;
-  margin-top:6px;
   font-size:14px;
+  display:block;
+  margin-top:5px;
+}
+
+.fieldlabel {
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  margin:14px 0 7px;
 }
 
 .target-row {
@@ -277,21 +276,21 @@ h2 small {
 }
 
 .target-row input {
-  flex:1;
   min-width:0;
-  background:var(--light);
-  border:1px solid var(--border);
-  border-radius:8px;
+  flex:1;
+  background:var(--sub);
+  border:1px solid var(--line);
   padding:10px;
+  border-radius:8px;
 }
 
 .primary {
-  background:var(--blue);
   border:0;
-  color:#fff;
+  background:var(--blue);
+  color:white;
+  font-weight:600;
   border-radius:8px;
   padding:10px 14px;
-  font-weight:600;
 }
 
 .modes {
@@ -301,32 +300,32 @@ h2 small {
 }
 
 .mode {
-  padding:11px 3px;
-  background:var(--light);
-  border:1px solid var(--border);
+  border:1px solid var(--line);
   border-radius:8px;
-  color:#667182;
+  background:var(--sub);
+  padding:10px 3px;
+  color:#697588;
 }
 
 .mode.active {
-  background:#eff6ff;
-  border-color:var(--blue);
   color:var(--blue);
+  border-color:var(--blue);
+  background:#eff6ff;
   font-weight:700;
 }
 
 .feedback {
+  background:var(--sub);
   padding:11px;
   border-radius:9px;
-  background:var(--light);
   color:#607086;
-  margin-top:13px;
+  margin-top:12px;
   font-size:11px;
   line-height:1.6;
 }
 
 .feedback.success {
-  background:#edfaef;
+  background:#eaf9ef;
   color:var(--green);
 }
 
@@ -335,50 +334,41 @@ h2 small {
   color:var(--red);
 }
 
-.fieldlabel {
-  display:block;
-  font-weight:600;
-  font-size:11px;
-  margin:13px 0 7px;
-}
+.zone { border-top:3px solid var(--zone-color); }
 
-.zone {border-top:3px solid var(--z)}
-
-.zoneheader {
+.zone-head {
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  margin-bottom:16px;
+  justify-content:space-between;
+  margin-bottom:15px;
 }
 
-.zoneheader b {font-size:13px}
-
-.zoneheader small {
-  background:var(--light);
-  padding:5px 8px;
-  border-radius:7px;
+.zone-head small {
   color:var(--muted);
+  padding:5px 8px;
+  background:var(--sub);
+  border-radius:7px;
 }
 
 .node {
   display:grid;
-  grid-template-columns:26px 1fr 58px 38px 55px 43px;
+  grid-template-columns:25px 1fr 54px 34px 54px 42px;
   gap:5px;
   align-items:center;
-  border-top:1px solid var(--border);
+  border-top:1px solid var(--line);
   padding:9px 0;
 }
 
-.node:first-child {border-top:0}
-
-.node-temp {
-  font-size:21px;
-  font-weight:300;
-}
+.node:first-child { border:0; }
 
 .node-id {
-  color:var(--z);
+  color:var(--zone-color);
   font-weight:700;
+}
+
+.node-temp {
+  font-size:20px;
+  font-weight:300;
 }
 
 .node-hum,.node-age {
@@ -388,35 +378,30 @@ h2 small {
 
 .status {
   font-size:9px;
-  padding:4px;
-  border-radius:20px;
   text-align:center;
-  background:#e9f9ee;
+  border-radius:15px;
+  background:#e7faef;
   color:var(--green);
-}
-
-.status.breach {
-  background:#feecec;
-  color:var(--red);
+  padding:4px 2px;
 }
 
 .status.offline {
-  background:#fff3df;
+  background:#fff4df;
   color:var(--orange);
 }
 
-.small-btn {
-  font-size:10px;
-  background:var(--light);
-  border:1px solid var(--border);
-  padding:5px 3px;
-  border-radius:6px;
-  color:#8b98a9;
+.status.breach {
+  background:#ffeded;
+  color:var(--red);
 }
 
-.small-btn:disabled {
-  opacity:.65;
-  cursor:not-allowed;
+.small-btn {
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:var(--sub);
+  color:#8b98a9;
+  font-size:10px;
+  padding:5px 2px;
 }
 
 .bottom {
@@ -426,38 +411,168 @@ h2 small {
   margin-bottom:16px;
 }
 
-.card-title {
-  font-size:12px;
-  font-weight:700;
-  color:#647184;
-  border-bottom:1px solid var(--border);
-  padding:16px 20px;
-}
+.padless { padding:0;overflow:hidden; }
 
-.padless {
-  padding:0;
-  overflow:hidden;
+.card-title {
+  padding:15px 20px;
+  font-weight:700;
+  font-size:12px;
+  color:#657386;
+  border-bottom:1px solid var(--line);
 }
 
 #dodagCanvas {
   width:100%;
-  height:340px;
+  height:365px;
   display:block;
 }
 
-.rightcol {
-  display:grid;
-  gap:16px;
+.dodag-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
 }
 
-.chart-tabs {display:flex}
+.dodag-live {
+  font-size:10px;
+  font-weight:700;
+  border-radius:12px;
+  padding:5px 9px;
+  background:#fff2df;
+  color:#b76b12;
+}
+
+.dodag-live.connected {
+  background:#e8faef;
+  color:#16a34a;
+}
+
+.dodag-toolbar {
+  padding:13px 18px 8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.dodag-filters,.dodag-demo {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.dodag-filter {
+  padding:7px 10px;
+  color:#687489;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:#fff;
+  font-weight:600;
+  font-size:11px;
+}
+
+.dodag-filter.active {
+  background:#eff6ff;
+  border-color:var(--blue);
+  color:var(--blue);
+}
+
+.dodag-demo select {
+  padding:7px;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:white;
+  color:#536174;
+  font-size:11px;
+}
+
+.dodag-demo button {
+  padding:8px 10px;
+  border:0;
+  border-radius:7px;
+  font-size:11px;
+  font-weight:700;
+  background:#fff0d5;
+  color:#a75d0b;
+}
+
+.dodag-metrics {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  padding:5px 18px 2px;
+}
+
+.dodag-metric {
+  background:#f7f9fc;
+  border:1px solid #edf0f5;
+  border-radius:9px;
+  padding:9px 11px;
+}
+
+.dodag-metric span {
+  display:block;
+  font-size:10px;
+  color:var(--muted);
+}
+
+.dodag-metric strong {
+  display:block;
+  font-size:20px;
+  margin-top:3px;
+  font-variant-numeric:tabular-nums;
+}
+
+.dodag-legend {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:15px;
+  border-top:1px solid var(--line);
+  padding:11px 16px 5px;
+  color:#526176;
+  font-size:11px;
+}
+
+.dodag-dot {
+  display:inline-block;
+  width:10px;
+  height:10px;
+  border-radius:100%;
+  margin-right:5px;
+  vertical-align:middle;
+}
+
+.dodag-route {
+  padding:7px 18px;
+  font:11px Consolas,monospace;
+  text-align:center;
+  color:#46566e;
+  min-height:30px;
+}
+
+.dodag-note {
+  color:var(--muted);
+  font-size:10px;
+  text-align:center;
+  line-height:1.5;
+  padding:3px 18px 14px;
+}
+
+.rightcol { display:grid;gap:16px; }
+.chart-tabs { display:flex; }
 
 .tab {
   width:50%;
+  padding:12px;
   border:0;
   border-bottom:2px solid transparent;
-  background:#fff;
-  padding:13px;
+  background:white;
   color:var(--muted);
 }
 
@@ -468,18 +583,18 @@ h2 small {
 
 #tempChart,#humChart {
   width:100%;
-  height:178px;
+  height:180px;
   display:block;
 }
 
-.zonestats {padding:15px}
+.zonestats { padding:14px; }
 
 .zone-stat {
   padding:10px 0;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid var(--line);
 }
 
-.zone-stat:last-child {border:0}
+.zone-stat:last-child { border:0; }
 
 .mini-values {
   display:flex;
@@ -489,7 +604,7 @@ h2 small {
   font-size:11px;
 }
 
-.mini-values b {color:#313d50}
+.mini-values b { color:#313d50; }
 
 .logs {
   display:grid;
@@ -497,26 +612,23 @@ h2 small {
   gap:16px;
 }
 
-.log-body {
-  height:205px;
-  overflow:auto;
-}
+.log-body { height:210px;overflow:auto; }
 
 .log-row {
-  font:10px Consolas,monospace;
   padding:7px 12px;
-  border-bottom:1px solid #f1f3f6;
+  border-bottom:1px solid #f0f2f5;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
+  font:10px Consolas,monospace;
 }
 
-.log-row.error {color:var(--red)}
-.log-row.control {color:#7c3aed}
+.log-row.control { color:#7c3aed; }
+.log-row.error { color:var(--red); }
 
 .alert-row {
   padding:10px 13px;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid var(--line);
   font-size:11px;
 }
 
@@ -524,47 +636,39 @@ h2 small {
   .stats,.zones,.bottom,.regulator,.logs {
     grid-template-columns:1fr;
   }
-
   .reg-right {
     border-left:0;
-    border-top:1px solid var(--border);
-    padding:18px 0 0;
+    border-top:1px solid var(--line);
+    padding:20px 0 0;
   }
-
-  .navlinks {display:none}
-  .banner {grid-template-columns:1fr}
-
-  .node {
-    grid-template-columns:28px 1fr 58px 38px 58px 43px;
-  }
+  .links { display:none; }
+  .banner { grid-template-columns:1fr; }
 }
 </style>
 </head>
+
 <body>
 
 <nav>
-  <div class="logo"><i>❄</i>ColdChain</div>
-
-  <div class="navlinks">
+  <div class="brand"><i>❄</i>ColdChain</div>
+  <div class="links">
     <strong>Dashboard</strong>
     <span>Summary</span>
     <span>Sensors</span>
     <span>Settings</span>
   </div>
-
   <div class="navright">
     <span id="brokerPill" class="pill">
-      BROKER: CONNECTING
+      LOCAL BROKER: CONNECTING
     </span>
     <span id="tickPill">tick: 0</span>
   </div>
 </nav>
 
 <main>
-
 <h2>Sensors <small>3 zones · 6 nodes</small></h2>
 
-<div class="stats">
+<section class="stats">
   <div class="card">
     <div class="stat-head">
       <div>
@@ -573,7 +677,7 @@ h2 small {
       </div>
       <strong class="stat-count" id="countOnline">0</strong>
     </div>
-    <div class="stat-track">
+    <div class="track">
       <div id="barOnline" style="background:var(--green);width:0%"></div>
     </div>
   </div>
@@ -586,7 +690,7 @@ h2 small {
       </div>
       <strong class="stat-count" id="countBreach">0</strong>
     </div>
-    <div class="stat-track">
+    <div class="track">
       <div id="barBreach" style="background:var(--red);width:0%"></div>
     </div>
   </div>
@@ -599,13 +703,13 @@ h2 small {
       </div>
       <strong class="stat-count" id="countOff">6</strong>
     </div>
-    <div class="stat-track">
+    <div class="track">
       <div id="barOff" style="background:var(--orange);width:100%"></div>
     </div>
   </div>
-</div>
+</section>
 
-<div class="banner">
+<section class="banner">
   <div class="banner-info">
     <small>ZONE C — DOCK</small>
     <div class="banner-temp">
@@ -616,7 +720,7 @@ h2 small {
     <span id="bannerStatus">Waiting for readings...</span>
   </div>
   <canvas id="overviewCanvas"></canvas>
-</div>
+</section>
 
 <div class="toolbar">
   <button class="btn" onclick="triggerBreach()">
@@ -642,16 +746,13 @@ h2 small {
   <div class="reg-left">
     <div>
       <b>S1 · FREEZER</b>
-
       <span id="s1Badge" class="pill" style="margin-left:8px">
         WAITING FOR CONTROLLER
       </span>
-
       <div class="s1temp">
         <span id="s1CurrentTemp">--.-</span>
         <small> °C</small>
       </div>
-
       <div class="muted">
         Live S1 reading · Safe range −25°C to −15°C
       </div>
@@ -662,12 +763,10 @@ h2 small {
         <small>ACTIVE TARGET</small>
         <b id="s1ActiveTarget">-- °C</b>
       </div>
-
       <div class="ctrl-detail">
         <small>ACTUATOR</small>
         <b id="s1Actuator">Unknown</b>
       </div>
-
       <div class="ctrl-detail">
         <small>DHT AMBIENT</small>
         <b id="s1Ambient">-- °C</b>
@@ -677,9 +776,8 @@ h2 small {
 
   <div class="reg-right">
     <b>Set optimum temperature</b>
-
     <p class="muted">
-      Send heating or cooling commands to Wokwi Sensor 1.
+      Send heating or cooling commands to your local Wokwi ESP32.
     </p>
 
     <label class="fieldlabel" for="s1TargetInput">
@@ -687,57 +785,29 @@ h2 small {
     </label>
 
     <div class="target-row">
-      <input
-        id="s1TargetInput"
-        type="number"
-        value="-20"
-        min="-25"
-        max="-15"
-        step="0.5"
-      >
-
+      <input id="s1TargetInput" type="number"
+             value="-20" min="-25" max="-15" step="0.5">
       <button class="primary" onclick="setS1Target()">
         Apply Target
       </button>
     </div>
 
     <label class="fieldlabel">Control Mode</label>
-
     <div class="modes">
-      <button
-        class="mode active"
-        id="mode-auto"
-        onclick="setS1Mode('auto')">
-        ↻ Auto
-      </button>
-
-      <button
-        class="mode"
-        id="mode-heat"
-        onclick="setS1Mode('heat')">
-        ↑ Heat
-      </button>
-
-      <button
-        class="mode"
-        id="mode-cool"
-        onclick="setS1Mode('cool')">
-        ↓ Cool
-      </button>
-
-      <button
-        class="mode"
-        id="mode-off"
-        onclick="setS1Mode('off')">
-        ■ Stop
-      </button>
+      <button class="mode active" id="mode-auto"
+              onclick="setS1Mode('auto')">↻ Auto</button>
+      <button class="mode" id="mode-heat"
+              onclick="setS1Mode('heat')">↑ Heat</button>
+      <button class="mode" id="mode-cool"
+              onclick="setS1Mode('cool')">↓ Cool</button>
+      <button class="mode" id="mode-off"
+              onclick="setS1Mode('off')">■ Stop</button>
     </div>
 
     <div class="feedback" id="s1Feedback">
-      Waiting for Wokwi S1 controller.
+      Waiting for local Mosquitto and Wokwi S1.
     </div>
-
-    <p class="muted" style="margin-top:8px">
+    <p class="muted">
       Auto maintains the target. Heat and Cool move toward it;
       Stop disables regulation.
     </p>
@@ -748,38 +818,58 @@ h2 small {
 <section class="zones" id="zonesContainer"></section>
 
 <div class="bottom">
-  <section class="card padless">
-    <div class="card-title">
-      🟢 DODAG TOPOLOGY — LIVE
+  <section class="card padless" aria-label="Bidirectional DODAG routing visualization">
+    <div class="card-title dodag-heading">
+      <span>🌐 DODAG ROUTING — UPWARD &amp; DOWNWARD</span>
+      <span id="dodagLive" class="dodag-live">MQTT DISCONNECTED</span>
     </div>
-    <canvas id="dodagCanvas"></canvas>
+    <div class="dodag-toolbar">
+      <div class="dodag-filters" role="group" aria-label="Show DODAG traffic direction">
+        <button id="dodag-both" class="dodag-filter active" onclick="setDodagView('both')">↕ Both</button>
+        <button id="dodag-up" class="dodag-filter" onclick="setDodagView('up')">↑ Upward</button>
+        <button id="dodag-down" class="dodag-filter" onclick="setDodagView('down')">↓ Downward</button>
+      </div>
+      <div class="dodag-demo">
+        <label for="dodagDemoTarget" class="muted">Target:</label>
+        <select id="dodagDemoTarget" aria-label="Choose demonstration sensor">
+          <option value="S1">S1 · Freezer</option>
+          <option value="S2">S2 · Freezer</option>
+          <option value="S3">S3 · Chiller</option>
+          <option value="S4">S4 · Chiller</option>
+          <option value="S5">S5 · Dock</option>
+          <option value="S6">S6 · Dock</option>
+        </select>
+        <button onclick="demoDodagDown()" title="Visualization only: no MQTT command sent">▶ Demo downward</button>
+      </div>
+    </div>
+    <div class="dodag-metrics">
+      <div class="dodag-metric"><span>↑ Sensor uplinks</span><strong id="dodagUpCount">0</strong></div>
+      <div class="dodag-metric"><span>↓ Downlink routes</span><strong id="dodagDownCount">0</strong></div>
+      <div class="dodag-metric"><span>✓ ESP32 ACKs</span><strong id="dodagAckCount">0</strong></div>
+    </div>
+    <canvas id="dodagCanvas" role="img" aria-label="DODAG root, zone routers and six sensors with animated upward telemetry and downward commands"></canvas>
+    <div class="dodag-legend">
+      <span><i class="dodag-dot" style="background:#06b6d4"></i>Upward telemetry</span>
+      <span><i class="dodag-dot" style="background:#f59e0b"></i>Downward commands</span>
+      <span><i class="dodag-dot" style="background:#10b981"></i>Upward ACK</span>
+    </div>
+    <div id="dodagLastRoute" class="dodag-route" aria-live="polite">Waiting for live MQTT packets...</div>
+    <div class="dodag-note">Logical RPL-style route visualization driven by MQTT events; MQTT itself goes through Mosquitto, not physical RPL routers. Demo packets do not send commands.</div>
   </section>
-
   <div class="rightcol">
     <section class="card padless">
       <div class="chart-tabs">
-        <button
-          class="tab active"
-          id="tabTemp"
-          onclick="switchChart('temp')">
-          🌡 Temperature
-        </button>
-
-        <button
-          class="tab"
-          id="tabHum"
-          onclick="switchChart('hum')">
-          💧 Humidity
-        </button>
+        <button class="tab active" id="tabTemp"
+                onclick="switchChart('temp')">🌡 Temperature</button>
+        <button class="tab" id="tabHum"
+                onclick="switchChart('hum')">💧 Humidity</button>
       </div>
-
       <canvas id="tempChart"></canvas>
       <canvas id="humChart" style="display:none"></canvas>
     </section>
-
     <section class="card padless">
       <div class="card-title">ZONE STATISTICS</div>
-      <div id="statsContainer" class="zonestats"></div>
+      <div class="zonestats" id="statsContainer"></div>
     </section>
   </div>
 </div>
@@ -792,65 +882,306 @@ h2 small {
     </div>
     <div class="log-body" id="mqttLog"></div>
   </section>
-
   <section class="card padless">
     <div class="card-title">ALERT EVENTS</div>
     <div class="log-body" id="alertLog"></div>
   </section>
 </div>
-
 </main>
 
 <script>
 'use strict';
 
-const BROKER_HOST = 'broker.hivemq.com';
-const BROKER_PORT = 8884;
+const MQTT_HOST = '127.0.0.1';
+const MQTT_PORT = 9001;
+const MQTT_PATH = '/mqtt';
 
-const S1_PREFIX = 'coldchain/lab-7b39f2/zoneA/S1';
-const S1_TEMP = S1_PREFIX + '/temperature';
-const S1_STATE = S1_PREFIX + '/control/state';
-const S1_COMMAND = S1_PREFIX + '/control/command';
-const S1_STATUS = S1_PREFIX + '/status';
+const ROOT = 'coldchain/lab-7b39f2/zoneA/S1';
+const S1_TEMP = ROOT + '/temperature';
+const S1_STATE = ROOT + '/control/state';
+const S1_COMMAND = ROOT + '/control/command';
+const S1_STATUS = ROOT + '/status';
 
-const STD = 'coldchain';
-const SAFE_MIN = -25;
-const SAFE_MAX = -15;
-const FRESH_MS = 12000;
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+const u16 = n => [n >> 8 & 255, n & 255];
+
+const mqttStr = s => {
+  const bytes = enc.encode(String(s));
+  return [...u16(bytes.length), ...bytes];
+};
+
+function mqttFrame(head, body) {
+  let n = body.length;
+  const len = [];
+
+  do {
+    let b = n % 128;
+    n = Math.floor(n / 128);
+    if (n) b |= 128;
+    len.push(b);
+  } while (n);
+
+  return new Uint8Array([head, ...len, ...body]);
+}
+
+class LocalMQTT {
+  constructor() {
+    this.ws = null;
+    this.ready = false;
+    this.nextPacket = 0;
+    this.input = new Uint8Array(0);
+    this.subs = new Map();
+    this.ping = null;
+    this.connectTimeout = null;
+    this.onMessage = null;
+    this.onConnected = null;
+    this.onDisconnected = null;
+  }
+
+  isConnected() {
+    return this.ready &&
+      this.ws &&
+      this.ws.readyState === WebSocket.OPEN;
+  }
+
+  packetId() {
+    this.nextPacket = this.nextPacket % 65535 + 1;
+    return this.nextPacket;
+  }
+
+  sendBytes(bytes) {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      throw new Error('Local MQTT socket is closed');
+    }
+    this.ws.send(bytes);
+  }
+
+  connect() {
+    this.ready = false;
+
+    const ws = new WebSocket(
+      `ws://${MQTT_HOST}:${MQTT_PORT}${MQTT_PATH}`,
+      'mqtt'
+    );
+
+    ws.binaryType = 'arraybuffer';
+    this.ws = ws;
+
+    this.connectTimeout = setTimeout(() => {
+      if (!this.ready && this.ws === ws) ws.close();
+    }, 10000);
+
+    ws.onopen = () => {
+      this.sendBytes(mqttFrame(0x10, [
+        0, 4, 77, 81, 84, 84, 4, 2, 0, 30,
+        ...mqttStr(
+          'cc_dash_' + Math.random().toString(36).slice(2, 11)
+        )
+      ]));
+    };
+
+    ws.onmessage = async e => {
+      const raw = e.data instanceof ArrayBuffer
+        ? new Uint8Array(e.data)
+        : new Uint8Array(await e.data.arrayBuffer());
+
+      this.receive(raw);
+    };
+
+    ws.onerror = () => {
+      console.error(
+        'Local Mosquitto WebSocket error. Is port 9001 listening?'
+      );
+    };
+
+    ws.onclose = () => {
+      if (this.ws !== ws) return;
+
+      const hadConnection = this.ready;
+      this.ready = false;
+
+      clearTimeout(this.connectTimeout);
+      clearInterval(this.ping);
+
+      this.subs.clear();
+      this.input = new Uint8Array(0);
+
+      this.onDisconnected?.(hadConnection);
+    };
+  }
+
+  receive(bytes) {
+    const buf = new Uint8Array(
+      this.input.length + bytes.length
+    );
+
+    buf.set(this.input);
+    buf.set(bytes, this.input.length);
+
+    let p = 0;
+
+    while (p < buf.length) {
+      if (p + 2 > buf.length) break;
+
+      const head = buf[p];
+      let q = p + 1;
+      let size = 0;
+      let multiplier = 1;
+      let complete = false;
+
+      for (let i = 0; i < 4; i++) {
+        if (q >= buf.length) break;
+
+        const b = buf[q++];
+        size += (b & 127) * multiplier;
+
+        if (!(b & 128)) {
+          complete = true;
+          break;
+        }
+        multiplier *= 128;
+      }
+
+      if (!complete || q + size > buf.length) break;
+
+      this.parsePacket(
+        head,
+        buf.subarray(q, q + size)
+      );
+
+      p = q + size;
+    }
+
+    this.input = buf.slice(p);
+  }
+
+  parsePacket(head, body) {
+    const type = head >> 4;
+
+    if (type === 2) {
+      if (body.length < 2 || body[1] !== 0) {
+        console.error('MQTT CONNECT refused', body[1]);
+        this.ws.close();
+        return;
+      }
+
+      clearTimeout(this.connectTimeout);
+
+      this.ready = true;
+
+      this.ping = setInterval(() => {
+        if (this.isConnected()) {
+          this.sendBytes(new Uint8Array([0xC0, 0]));
+        }
+      }, 15000);
+
+      this.onConnected?.();
+    }
+
+    else if (type === 3) {
+      if (body.length < 2) return;
+
+      const n = body[0] * 256 + body[1];
+      let at = n + 2;
+
+      if (at > body.length) return;
+
+      const topic = dec.decode(body.subarray(2, at));
+      const qos = head >> 1 & 3;
+      let id = 0;
+
+      if (qos) {
+        if (at + 2 > body.length) return;
+        id = body[at] * 256 + body[at + 1];
+        at += 2;
+      }
+
+      try {
+        this.onMessage?.(
+          topic,
+          dec.decode(body.subarray(at))
+        );
+      } finally {
+        if (qos === 1) {
+          this.sendBytes(mqttFrame(0x40, u16(id)));
+        }
+      }
+    }
+
+    else if (type === 9) {
+      if (body.length < 3) return;
+
+      const id = body[0] * 256 + body[1];
+      const topic = this.subs.get(id);
+
+      this.subs.delete(id);
+
+      console.log(
+        body[2] === 128 ? 'SUBSCRIPTION REFUSED' : 'SUBSCRIBED',
+        topic
+      );
+    }
+  }
+
+  subscribe(topic, qos = 0) {
+    const id = this.packetId();
+
+    this.subs.set(id, topic);
+
+    this.sendBytes(mqttFrame(0x82, [
+      ...u16(id),
+      ...mqttStr(topic),
+      qos
+    ]));
+  }
+
+  publish(topic, payload, qos = 1) {
+    const id = qos ? u16(this.packetId()) : [];
+
+    this.sendBytes(mqttFrame(
+      0x30 | qos << 1,
+      [
+        ...mqttStr(topic),
+        ...id,
+        ...enc.encode(String(payload))
+      ]
+    ));
+  }
+}
+
+const $ = id => document.getElementById(id);
 
 const ZONES = {
   A: {
-    name:'Zone A — Freezer',
-    color:'#2563eb',
-    range:[-25,-15],
-    nodes:['S1','S2']
+    name: 'Zone A — Freezer',
+    range: [-25, -15],
+    color: '#2563eb',
+    nodes: ['S1', 'S2']
   },
   B: {
-    name:'Zone B — Chiller',
-    color:'#0891b2',
-    range:[0,5],
-    nodes:['S3','S4']
+    name: 'Zone B — Chiller',
+    range: [0, 5],
+    color: '#0891b2',
+    nodes: ['S3', 'S4']
   },
   C: {
-    name:'Zone C — Dock',
-    color:'#d97706',
-    range:[2,8],
-    nodes:['S5','S6']
+    name: 'Zone C — Dock',
+    range: [2, 8],
+    color: '#d97706',
+    nodes: ['S5', 'S6']
   }
 };
 
 const NODE_ZONE = {
-  S1:'A',
-  S2:'A',
-  S3:'B',
-  S4:'B',
-  S5:'C',
-  S6:'C'
+  S1:'A', S2:'A', S3:'B',
+  S4:'B', S5:'C', S6:'C'
 };
 
-const IDS = ['S1','S2','S3','S4','S5','S6'];
+const IDS = Object.keys(NODE_ZONE);
 
-const data = Object.fromEntries(
+const state = Object.fromEntries(
   IDS.map(id => [
     id,
     {
@@ -858,362 +1189,236 @@ const data = Object.fromEntries(
       hum:null,
       seen:0,
       breach:false,
-      history:[],
-      humidityHistory:[],
-      manualOff:false
+      manualOff:false,
+      temps:[],
+      hums:[]
     }
   ])
 );
 
-const DOG = {
-  root:{parent:null,rank:1,alive:true},
-  routerA:{parent:'root',rank:2,alive:true},
-  routerB:{parent:'root',rank:2,alive:true},
-  routerC:{parent:'root',rank:2,alive:true},
-  S1:{parent:'routerA',rank:3,alive:false},
-  S2:{parent:'routerA',rank:3,alive:false},
-  S3:{parent:'routerB',rank:3,alive:false},
-  S4:{parent:'routerB',rank:3,alive:false},
-  S5:{parent:'routerC',rank:3,alive:false},
-  S6:{parent:'routerC',rank:3,alive:false}
-};
-
 const s1 = {
   mode:'auto',
   target:-20,
-  actuator:null,
+  actuator:'off',
   ambient:null,
   seen:0,
   pending:null,
   feedback:'',
-  feedbackClass:''
+  kind:''
 };
 
-let mqttClient = null;
+const mqtt = new LocalMQTT();
+
 let tick = 0;
-let logCount = 0;
-let activeChart = 'temp';
-let reconnectTimer = null;
+let count = 0;
 
-const $ = id => document.getElementById(id);
+const DODAG_PARENT = {
+  S1:'routerA', S2:'routerA', S3:'routerB',
+  S4:'routerB', S5:'routerC', S6:'routerC',
+  routerA:'root', routerB:'root', routerC:'root'
+};
 
-const connected = () =>
-  mqttClient && mqttClient.isConnected();
+const dodag = {
+  view:'both',
+  packets:[],
+  uplinks:0,
+  downlinks:0,
+  acknowledgements:0,
+  recentCommands:new Set(),
+  recentAcks:new Set(),
+  lastRoute:'Waiting for live MQTT packets...'
+};
 
-const fresh = id =>
-  connected() &&
-  !data[id].manualOff &&
-  data[id].seen > 0 &&
-  Date.now() - data[id].seen < FRESH_MS;
+function routeForSensor(id, direction) {
+  if (!Object.prototype.hasOwnProperty.call(DODAG_PARENT, id)) {
+    return null;
+  }
 
-const ctrlOnline = () =>
-  fresh('S1') &&
-  s1.seen > 0 &&
-  Date.now() - s1.seen < FRESH_MS;
+  const upward = [id, DODAG_PARENT[id], 'root'];
+  return direction === 'down' ? upward.slice().reverse() : upward;
+}
 
-function tempTopicFor(id) {
-  return id === 'S1'
+function rememberEvent(set, id) {
+  if (!id || set.has(id)) return false;
+  set.add(id);
+  if (set.size > 200) set.delete(set.values().next().value);
+  return true;
+}
+
+function enqueueDodag(kind, id, label = '', demonstration = false) {
+  const path = routeForSensor(id, kind === 'down' ? 'down' : 'up');
+  if (!path) return;
+
+  const now = performance.now();
+  dodag.packets.push({
+    kind, path, id, label,
+    start:now,
+    duration:kind === 'down' ? 1550 : 1450,
+    demonstration
+  });
+
+  if (dodag.packets.length > 70) {
+    dodag.packets.splice(0, dodag.packets.length - 70);
+  }
+
+  if (!demonstration) {
+    if (kind === 'up') dodag.uplinks++;
+    if (kind === 'down') dodag.downlinks++;
+    if (kind === 'ack') dodag.acknowledgements++;
+  }
+
+  $('dodagUpCount').textContent = dodag.uplinks;
+  $('dodagDownCount').textContent = dodag.downlinks;
+  $('dodagAckCount').textContent = dodag.acknowledgements;
+
+  const routeText = path.join(' → ');
+  const prefix = demonstration ? 'DEMO' : kind.toUpperCase();
+  dodag.lastRoute = `${prefix}: ${routeText}${label ? ' · ' + label : ''}`;
+  $('dodagLastRoute').textContent = dodag.lastRoute;
+}
+
+function setDodagView(view) {
+  if (!['both','up','down'].includes(view)) return;
+  dodag.view = view;
+  for (const v of ['both','up','down']) {
+    $('dodag-' + v).classList.toggle('active', v === view);
+    $('dodag-' + v).setAttribute('aria-pressed', String(v === view));
+  }
+}
+
+function demoDodagDown() {
+  const id = $('dodagDemoTarget').value;
+  setDodagView('both');
+  enqueueDodag('down', id, 'visual demo only', true);
+  setTimeout(() => enqueueDodag('ack', id, 'visual demo return', true), 1700);
+}
+
+const online = id =>
+  mqtt.isConnected() &&
+  !state[id].manualOff &&
+  state[id].temp !== null &&
+  Date.now() - state[id].seen < 12000;
+
+const controllerOnline = () =>
+  online('S1') &&
+  Date.now() - s1.seen < 12000;
+
+const tempTopic = id =>
+  id === 'S1'
     ? S1_TEMP
-    : `${STD}/zone${NODE_ZONE[id]}/${id}/temperature`;
-}
-
-function statusTopicFor(id) {
-  return id === 'S1'
-    ? S1_STATUS
-    : `${STD}/zone${NODE_ZONE[id]}/${id}/status`;
-}
+    : `coldchain/zone${NODE_ZONE[id]}/${id}/temperature`;
 
 function buildZones() {
   $('zonesContainer').innerHTML =
-    Object.entries(ZONES).map(([z,zone]) => `
-      <article class="card zone" style="--z:${zone.color}">
-        <header class="zoneheader">
-          <b>${zone.name}</b>
-          <small>
-            ${zone.range[0]}° to ${zone.range[1]}°C
-          </small>
-        </header>
-        <div>
-          ${zone.nodes.map(id => `
-            <div class="node">
-              <span class="node-id">${id}</span>
-              <span class="node-temp" id="temp-${id}">--.-</span>
-              <span class="node-hum" id="hum-${id}">--%</span>
-              <span class="node-age" id="age-${id}">--</span>
-              <span class="status offline" id="st-${id}">
-                offline
-              </span>
-              <button
-                id="btn-${id}"
-                class="small-btn"
-                onclick="toggleNode('${id}')"
-                ${id === 'S1'
-                  ? 'disabled title="Managed by Wokwi"'
-                  : ''}>
-                ${id === 'S1' ? 'Wokwi' : 'kill'}
-              </button>
-            </div>
-          `).join('')}
+    Object.entries(ZONES).map(([z, v]) => `
+      <article class="card zone"
+               style="--zone-color:${v.color}">
+        <div class="zone-head">
+          <b>${v.name}</b>
+          <small>${v.range[0]}° to ${v.range[1]}°C</small>
         </div>
+        ${v.nodes.map(id => `
+          <div class="node">
+            <span class="node-id">${id}</span>
+            <span class="node-temp" id="temp-${id}">--.-</span>
+            <span class="node-hum" id="hum-${id}">--%</span>
+            <span class="node-age" id="age-${id}">--</span>
+            <span class="status offline"
+                  id="st-${id}">offline</span>
+            <button class="small-btn" id="btn-${id}"
+                    onclick="toggleNode('${id}')"
+                    ${id === 'S1' ? 'disabled' : ''}>
+              ${id === 'S1' ? 'Wokwi' : 'kill'}
+            </button>
+          </div>
+        `).join('')}
       </article>
     `).join('');
 }
 
-function refreshCounters() {
-  const online = IDS.filter(
-    id => fresh(id)
-  ).length;
+function refreshNodes() {
+  let active = 0;
+  let breach = 0;
 
-  const breach = IDS.filter(
-    id => fresh(id) && data[id].breach
-  ).length;
-
-  $('countOnline').textContent = online;
-  $('countBreach').textContent = breach;
-  $('countOff').textContent = IDS.length - online;
-
-  $('barOnline').style.width =
-    (online / 6 * 100) + '%';
-
-  $('barBreach').style.width =
-    (breach / 6 * 100) + '%';
-
-  $('barOff').style.width =
-    ((6 - online) / 6 * 100) + '%';
-}
-
-function renderNodes() {
   for (const id of IDS) {
-    const n = data[id];
-    const isFresh = fresh(id);
-    const zone = ZONES[NODE_ZONE[id]];
+    const v = state[id];
+    const ok = online(id);
+    const z = ZONES[NODE_ZONE[id]];
 
-    DOG[id].alive = isFresh;
+    if (ok) active++;
+    if (ok && v.breach) breach++;
 
     $('temp-' + id).textContent =
-      isFresh ? n.temp.toFixed(1) : '--.-';
+      ok ? v.temp.toFixed(1) : '--.-';
 
     $('temp-' + id).style.color =
-      n.breach && isFresh
-        ? 'var(--red)'
-        : zone.color;
+      ok && v.breach ? 'var(--red)' : z.color;
 
     $('hum-' + id).textContent =
-      isFresh && Number.isFinite(n.hum)
-        ? n.hum.toFixed(1) + '%'
+      ok && Number.isFinite(v.hum)
+        ? v.hum.toFixed(1) + '%'
         : '--%';
 
     $('age-' + id).textContent =
-      isFresh
-        ? Math.floor(
-            (Date.now() - n.seen) / 1000
-          ) + 's'
+      ok
+        ? Math.floor((Date.now() - v.seen) / 1000) + 's'
         : '--';
 
-    const el = $('st-' + id);
+    $('st-' + id).textContent =
+      ok ? (v.breach ? 'BREACH' : 'online') : 'offline';
 
-    el.textContent =
-      isFresh
-        ? (n.breach ? 'BREACH' : 'online')
-        : 'offline';
-
-    el.className =
+    $('st-' + id).className =
       'status ' +
-      (isFresh
-        ? (n.breach ? 'breach' : '')
-        : 'offline');
+      (!ok ? 'offline' : v.breach ? 'breach' : '');
 
     if (id !== 'S1') {
       $('btn-' + id).textContent =
-        n.manualOff ? 'revive' : 'kill';
+        v.manualOff ? 'revive' : 'kill';
     }
   }
 
-  refreshCounters();
+  $('countOnline').textContent = active;
+  $('countBreach').textContent = breach;
+  $('countOff').textContent = 6 - active;
+
+  $('barOnline').style.width = (active / 6 * 100) + '%';
+  $('barBreach').style.width = (breach / 6 * 100) + '%';
+  $('barOff').style.width = ((6 - active) / 6 * 100) + '%';
+
+  refreshRegulator();
 }
 
-function pushReading(id,temp,hum) {
-  const n = data[id];
-  const zone = ZONES[NODE_ZONE[id]];
-
-  n.temp = temp;
-  n.hum = hum;
-  n.seen = Date.now();
-
-  n.breach =
-    temp < zone.range[0] ||
-    temp > zone.range[1];
-
-  n.history.push(temp);
-
-  if (n.history.length > 60) {
-    n.history.shift();
-  }
-
-  if (Number.isFinite(hum)) {
-    n.humidityHistory.push(hum);
-
-    if (n.humidityHistory.length > 60) {
-      n.humidityHistory.shift();
-    }
-  }
-
-  if (id === 'S1') {
-    n.manualOff = false;
-  }
-
-  if (id === 'S6') {
-    $('bannerTemp').textContent =
-      temp.toFixed(1);
-
-    $('bannerDate').textContent =
-      new Date().toLocaleDateString('en-GB');
-
-    $('bannerStatus').textContent =
-      n.breach
-        ? '🔴 Temperature breach — cooling required'
-        : '🟢 Within normal range';
-  }
-
-  tick++;
-
-  $('tickPill').textContent =
-    'tick: ' + tick;
-
-  renderNodes();
-  renderRegulator();
-  renderStats();
-  drawCharts();
-}
-
-function receiveController(payload) {
-  if (
-    !payload ||
-    payload.node !== 'S1' ||
-    (
-      payload.controller !== true &&
-      payload.controller !== 'true'
-    )
-  ) {
-    return;
-  }
-
-  s1.seen = Date.now();
-
-  if (
-    ['auto','heat','cool','off'].includes(payload.mode)
-  ) {
-    s1.mode = payload.mode;
-  }
-
-  if (payload.target != null) {
-    const t = Number(payload.target);
-
-    if (
-      Number.isFinite(t) &&
-      t >= SAFE_MIN &&
-      t <= SAFE_MAX
-    ) {
-      s1.target = t;
-    }
-  }
-
-  if (
-    ['cool','heat','off'].includes(payload.actuator)
-  ) {
-    s1.actuator = payload.actuator;
-  }
-
-  if (
-    payload.ambient != null &&
-    Number.isFinite(Number(payload.ambient))
-  ) {
-    s1.ambient = Number(payload.ambient);
-  }
-
-  if (
-    s1.pending &&
-    payload.request_id === s1.pending.id &&
-    typeof payload.ok === 'boolean'
-  ) {
-    const p = s1.pending;
-
-    s1.pending = null;
-
-    if (!payload.ok) {
-      s1.feedback =
-        'ESP32 rejected the command.';
-
-      s1.feedbackClass = 'error';
-    } else if (
-      payload.mode !== p.mode ||
-      payload.target == null ||
-      !Number.isFinite(Number(payload.target)) ||
-      Math.abs(
-        Number(payload.target) - p.target
-      ) > 0.06
-    ) {
-      s1.feedback =
-        'ESP32 acknowledged a different mode or target.';
-
-      s1.feedbackClass = 'error';
-    } else {
-      s1.feedback =
-        `✓ Wokwi confirmed ${p.mode.toUpperCase()} at ${p.target.toFixed(1)}°C.`;
-
-      s1.feedbackClass = 'success';
-    }
-  }
-
-  if (
-    !s1.pending &&
-    s1.feedback ===
-      'Wokwi S1 not online yet. Wait for a live reading first.'
-  ) {
-    s1.feedback = '';
-    s1.feedbackClass = '';
-  }
-
-  renderRegulator();
-}
-
-function renderRegulator() {
-  const ok = ctrlOnline();
+function refreshRegulator() {
+  const good = controllerOnline();
 
   $('s1CurrentTemp').textContent =
-    fresh('S1')
-      ? data.S1.temp.toFixed(1)
-      : '--.-';
+    online('S1') ? state.S1.temp.toFixed(1) : '--.-';
 
   $('s1ActiveTarget').textContent =
-    ok && Number.isFinite(s1.target)
-      ? s1.target.toFixed(1) + ' °C'
-      : '-- °C';
+    good ? s1.target.toFixed(1) + ' °C' : '-- °C';
 
   $('s1Ambient').textContent =
-    ok && Number.isFinite(s1.ambient)
+    good && Number.isFinite(s1.ambient)
       ? s1.ambient.toFixed(1) + ' °C'
       : '-- °C';
 
   $('s1Actuator').textContent =
-    ok
+    good
       ? ({
-          cool:'❄ Cooling',
           heat:'♨ Heating',
+          cool:'❄ Cooling',
           off:'Idle'
         }[s1.actuator] || 'Unknown')
       : 'Unknown';
 
-  const badge = $('s1Badge');
-
-  badge.className =
+  $('s1Badge').className =
     'pill ' +
-    (!connected() ? 'bad' : ok ? 'good' : '');
+    (!mqtt.isConnected() ? 'bad' : good ? 'good' : '');
 
-  badge.textContent =
-    !connected()
-      ? 'BROKER OFFLINE'
-      : ok
+  $('s1Badge').textContent =
+    !mqtt.isConnected()
+      ? 'LOCAL BROKER OFFLINE'
+      : good
         ? '● CONTROLLER ONLINE'
         : 'WAITING FOR CONTROLLER';
 
@@ -1222,190 +1427,288 @@ function renderRegulator() {
     Date.now() - s1.pending.at > 15000
   ) {
     s1.pending = null;
-
     s1.feedback =
-      'No matching ESP32 acknowledgement within 15s. Check Wokwi for COMMAND ACCEPTED and the same request_id; the broker connection alone is not proof of delivery.';
-
-    s1.feedbackClass = 'error';
+      'No matching ESP32 acknowledgement in 15 seconds. Check local Mosquitto and Wokwi Serial Monitor.';
+    s1.kind = 'error';
   }
 
-  const msg = s1.pending
-    ? 'Command sent — waiting for ESP32 acknowledgement…'
+  $('s1Feedback').className = 'feedback ' + s1.kind;
+
+  $('s1Feedback').textContent = s1.pending
+    ? 'Command sent locally — awaiting ESP32 request_id acknowledgement...'
     : s1.feedback ||
-      (!connected()
-        ? 'MQTT broker disconnected.'
-        : !ok
-          ? 'Waiting for live Wokwi S1 telemetry…'
-          : `Controller active · mode: ${s1.mode} · actuator: ${s1.actuator || 'unknown'}`);
+      (!mqtt.isConnected()
+        ? 'Start Mosquitto with a WebSocket listener on port 9001.'
+        : good
+          ? `Controller active · mode: ${s1.mode} · actuator: ${s1.actuator}`
+          : 'Waiting for fresh telemetry from Wokwi Sensor S1.');
 
-  $('s1Feedback').textContent = msg;
-
-  $('s1Feedback').className =
-    'feedback ' + s1.feedbackClass;
-
-  ['auto','heat','cool','off'].forEach(m => {
-    $('mode-' + m).classList.toggle(
+  for (const mode of ['auto', 'heat', 'cool', 'off']) {
+    $('mode-' + mode).classList.toggle(
       'active',
-      m === s1.mode
+      s1.mode === mode
     );
-  });
+  }
+}
+
+function feedback(message, kind = '') {
+  s1.feedback = message;
+  s1.kind = kind;
+  refreshRegulator();
+}
+
+function receiveController(p, isStateMessage = false) {
+  if (!p || p.node !== 'S1' || p.controller !== true) {
+    return;
+  }
+
+  if (isStateMessage && typeof p.ok === 'boolean' && p.request_id &&
+      rememberEvent(dodag.recentAcks, String(p.request_id))) {
+    enqueueDodag('ack', 'S1', p.ok ? 'ESP32 accepted' : 'ESP32 rejected');
+  }
+
+  s1.seen = Date.now();
+
+  if (['auto','heat','cool','off'].includes(p.mode)) {
+    s1.mode = p.mode;
+  }
+
+  if (
+    p.target != null &&
+    Number.isFinite(Number(p.target)) &&
+    Number(p.target) >= -25 &&
+    Number(p.target) <= -15
+  ) {
+    s1.target = Number(p.target);
+  }
+
+  if (['heat','cool','off'].includes(p.actuator)) {
+    s1.actuator = p.actuator;
+  }
+
+  if (
+    p.ambient != null &&
+    Number.isFinite(Number(p.ambient))
+  ) {
+    s1.ambient = Number(p.ambient);
+  }
+
+  const waiting = s1.pending;
+
+  if (
+    waiting &&
+    p.request_id === waiting.id &&
+    typeof p.ok === 'boolean'
+  ) {
+    s1.pending = null;
+
+    if (!p.ok) {
+      feedback('ESP32 rejected the command.', 'error');
+    }
+    else if (
+      p.mode !== waiting.mode ||
+      p.target == null ||
+      Math.abs(Number(p.target) - waiting.target) > .06
+    ) {
+      feedback(
+        'ESP32 acknowledged a different mode or target.',
+        'error'
+      );
+    }
+    else {
+      feedback(
+        `✓ Wokwi confirmed ${waiting.mode.toUpperCase()} at ${waiting.target.toFixed(1)}°C.`,
+        'success'
+      );
+    }
+  }
+
+  refreshRegulator();
 }
 
 function sendCommand(mode) {
   const raw = $('s1TargetInput').value.trim();
-  const v = Number(raw);
+  const target = Number(raw);
 
   if (
     raw === '' ||
-    !Number.isFinite(v) ||
-    v < SAFE_MIN ||
-    v > SAFE_MAX
+    !Number.isFinite(target) ||
+    target < -25 ||
+    target > -15
   ) {
-    s1.feedback =
-      'Target must be between −25°C and −15°C.';
+    return feedback(
+      'Target must be between −25°C and −15°C.',
+      'error'
+    );
+  }
 
-    s1.feedbackClass = 'error';
-
-    renderRegulator();
+  if (!['auto','heat','cool','off'].includes(mode)) {
     return;
   }
 
-  if (
-    !['auto','heat','cool','off'].includes(mode)
-  ) {
-    return;
-  }
-
-  if (!connected()) {
-    s1.feedback = 'MQTT broker offline.';
-    s1.feedbackClass = 'error';
-    renderRegulator();
-    return;
+  if (!mqtt.isConnected()) {
+    return feedback(
+      'Local Mosquitto disconnected. Start the broker on port 9001.',
+      'error'
+    );
   }
 
   if (s1.pending) {
-    s1.feedback =
-      'Previous command is still awaiting an ESP32 response.';
-
-    s1.feedbackClass = 'error';
-    renderRegulator();
-    return;
+    return feedback(
+      'Previous command is still awaiting ESP32 confirmation.',
+      'error'
+    );
   }
 
-  const reqId =
+  const id =
     'dash-' +
     Date.now() +
     '-' +
-    Math.random().toString(36).slice(2,8);
+    Math.random().toString(36).slice(2, 8);
 
-  const cmd = {
+  const command = {
     node:'S1',
     mode,
-    target:v,
-    request_id:reqId,
+    target,
+    request_id:id,
     ts:Date.now()
   };
 
-  const msg = new Paho.MQTT.Message(
-    JSON.stringify(cmd)
-  );
-
-  msg.destinationName = S1_COMMAND;
-  msg.qos = 1;
-  msg.retained = false;
-
-  s1.pending = {
-    id:reqId,
-    mode,
-    target:v,
-    at:Date.now()
-  };
-
-  s1.feedback = '';
-  s1.feedbackClass = '';
-
   try {
-    mqttClient.send(msg);
-
-    console.log(
-      '[S1 COMMAND SENT]',
+    mqtt.publish(
       S1_COMMAND,
-      cmd
+      JSON.stringify(command),
+      1
     );
 
-    logMsg(
+    s1.pending = {
+      id,
+      mode,
+      target,
+      at:Date.now()
+    };
+
+    s1.feedback = '';
+    s1.kind = '';
+
+    log(
       'control',
-      '→ CMD',
-      JSON.stringify(cmd)
+      '→ ' + S1_COMMAND,
+      JSON.stringify(command)
     );
 
-    renderRegulator();
-  } catch(e) {
-    s1.pending = null;
+    console.log('[S1 COMMAND SENT]', command);
 
-    s1.feedback =
-      'MQTT publish error: ' + e.message;
-
-    s1.feedbackClass = 'error';
-
-    renderRegulator();
+    refreshRegulator();
   }
+  catch (e) {
+    s1.pending = null;
+    feedback('Publish failed: ' + e.message, 'error');
+  }
+}
+
+function setS1Mode(mode) {
+  sendCommand(mode);
 }
 
 function setS1Target() {
   sendCommand(s1.mode);
 }
 
-function setS1Mode(m) {
-  if (
-    ['auto','heat','cool','off'].includes(m)
-  ) {
-    sendCommand(m);
+function pushReading(id, temp, hum) {
+  const v = state[id];
+  const range = ZONES[NODE_ZONE[id]].range;
+
+  v.temp = temp;
+  v.hum = hum;
+  v.seen = Date.now();
+
+  v.breach =
+    temp < range[0] ||
+    temp > range[1];
+
+  v.temps.push(temp);
+
+  if (v.temps.length > 60) {
+    v.temps.shift();
   }
+
+  if (Number.isFinite(hum)) {
+    v.hums.push(hum);
+    if (v.hums.length > 60) v.hums.shift();
+  }
+
+  if (id === 'S1') {
+    v.manualOff = false;
+  }
+
+  if (id === 'S6') {
+    $('bannerTemp').textContent = temp.toFixed(1);
+
+    $('bannerDate').textContent =
+      new Date().toLocaleDateString('en-GB');
+
+    $('bannerStatus').textContent =
+      v.breach
+        ? '🔴 Temperature breach — cooling required'
+        : '🟢 Within normal range';
+  }
+
+  $('tickPill').textContent = 'tick: ' + (++tick);
+
+  enqueueDodag('up', id, 'temperature telemetry');
+  refreshNodes();
+  renderStats();
+  drawCharts();
 }
 
-function handleMessage(message) {
-  const topic = message.destinationName;
-  const raw = message.payloadString;
-
-  const kind =
+function onMqtt(topic, raw) {
+  log(
     topic.includes('/control/')
       ? 'control'
-      : topic.includes('/alerts/')
-        ? 'error'
-        : '';
+      : topic.includes('/alerts/') ? 'error' : '',
+    topic,
+    raw
+  );
 
-  logMsg(kind,topic,raw);
+  if (topic === S1_COMMAND) {
+    try {
+      const command = JSON.parse(raw);
+      if (command.node === 'S1' &&
+          (!command.request_id || rememberEvent(dodag.recentCommands, command.request_id))) {
+        enqueueDodag('down', 'S1', `${command.mode || 'control'} command`);
+      }
+    } catch (e) {
+      console.warn('Invalid S1 command event', e);
+    }
+    return;
+  }
 
-  if (
-    topic === S1_TEMP ||
-    topic === S1_STATE ||
-    topic === S1_STATUS
-  ) {
-    console.log(
-      '[S1 MQTT RECEIVED]',
-      topic,
-      raw
-    );
+  const zoneControl = topic.match(/^coldchain\/control\/(cooling|heating)\/(zone[A-C])$/);
+  if (zoneControl) {
+    const targets = IDS.filter(id => `zone${NODE_ZONE[id]}` === zoneControl[2]);
+    for (const id of targets) {
+      if (online(id)) {
+        enqueueDodag('down', id, `${zoneControl[1]} ${raw.trim()}`);
+      }
+    }
+    return;
   }
 
   if (topic === S1_STATE) {
     try {
-      receiveController(JSON.parse(raw));
-    } catch(e) {
-      console.warn('Invalid S1 state',e);
+      receiveController(JSON.parse(raw), true);
+    }
+    catch (e) {
+      console.error('Bad controller state', e);
     }
     return;
   }
 
   if (topic === S1_STATUS) {
-    if (
-      raw.trim() === 'offline' &&
-      !fresh('S1')
-    ) {
-      data.S1.seen = 0;
-      renderNodes();
-      renderRegulator();
+    if (raw.trim() === 'offline' && !online('S1')) {
+      state.S1.seen = 0;
+      refreshNodes();
     }
     return;
   }
@@ -1415,84 +1718,56 @@ function handleMessage(message) {
 
     try {
       p = JSON.parse(raw);
-    } catch(e) {
+    }
+    catch (e) {
       return;
     }
 
+    const id = p?.node;
+
     if (
-      !p ||
-      !IDS.includes(p.node)
+      !IDS.includes(id) ||
+      topic !== tempTopic(id) ||
+      (id === 'S1' && p.controller !== true)
     ) {
       return;
     }
 
-    const id = p.node;
+    if (p.temp == null || p.temp === '') return;
 
-    if (topic !== tempTopicFor(id)) {
-      return;
-    }
+    const t = Number(p.temp);
+    const h = p.hum == null ? null : Number(p.hum);
 
-    if (
-      id === 'S1' &&
-      p.controller !== true &&
-      p.controller !== 'true'
-    ) {
-      return;
-    }
+    if (!Number.isFinite(t)) return;
 
-    if (
-      p.temp === null ||
-      p.temp === undefined ||
-      p.temp === ''
-    ) {
-      return;
-    }
-
-    const temp = Number(p.temp);
-
-    if (!Number.isFinite(temp)) {
-      return;
-    }
-
-    const hum =
-      p.hum == null || p.hum === ''
-        ? null
-        : Number(p.hum);
-
-    if (!data[id].manualOff) {
+    if (!state[id].manualOff) {
       pushReading(
         id,
-        temp,
-        Number.isFinite(hum) ? hum : null
+        t,
+        Number.isFinite(h) ? h : null
       );
 
       if (id === 'S1') {
         receiveController(p);
       }
     }
-
     return;
   }
 
   if (topic.endsWith('/status')) {
     for (const id of IDS) {
       if (
-        id === 'S1' ||
-        topic !== statusTopicFor(id)
-      ) {
-        continue;
-      }
-
-      if (
+        id !== 'S1' &&
+        topic ===
+          `coldchain/zone${NODE_ZONE[id]}/${id}/status` &&
         raw.trim() === 'offline' &&
-        (!fresh(id) || data[id].manualOff)
+        !online(id)
       ) {
-        data[id].seen = 0;
-        renderNodes();
+        state[id].seen = 0;
+        refreshNodes();
       }
-
-      return;
     }
+    return;
   }
 
   if (
@@ -1502,194 +1777,133 @@ function handleMessage(message) {
     try {
       const p = JSON.parse(raw);
 
-      addAlert(
-        topic.endsWith('breach')
-          ? 'breach'
-          : 'recover',
-        (p.node || p.zone || 'sensor') +
-          ' ' +
-          (p.temp ?? '') +
-          '°C'
+      alertLine(
+        topic.endsWith('breach') ? 'BREACH' : 'RECOVER',
+        `${p.node || p.zone || 'Sensor'} ${p.temp ?? ''}°C`
       );
-    } catch(e) {}
+    }
+    catch (e) {}
   }
 }
 
 function connectBroker() {
-  if (typeof Paho === 'undefined') {
-    console.error('Paho MQTT library not loaded');
-    return;
-  }
+  mqtt.onConnected = () => {
+    $('brokerPill').textContent = 'LOCAL BROKER: ONLINE';
+    $('brokerPill').className = 'pill good';
 
-  const id =
-    'coldchain_dash_' +
-    Math.random().toString(36).slice(2,12);
+    mqtt.subscribe('coldchain/#', 0);
 
-  const c = new Paho.MQTT.Client(
-    BROKER_HOST,
-    BROKER_PORT,
-    id
-  );
+    log(
+      '',
+      'system',
+      'Local Mosquitto connected at 127.0.0.1:9001'
+    );
 
-  mqttClient = c;
-
-  c.onConnectionLost = ev => {
-    if (mqttClient !== c) {
-      return;
-    }
-
-    $('brokerPill').textContent =
-      'BROKER: RECONNECTING';
-
-    $('brokerPill').className = 'pill';
-
-    renderRegulator();
-
-    if (!reconnectTimer) {
-      reconnectTimer = setTimeout(() => {
-        reconnectTimer = null;
-        connectBroker();
-      },3500);
-    }
+    refreshNodes();
   };
 
-  c.onMessageArrived = handleMessage;
+  mqtt.onDisconnected = () => {
+    $('brokerPill').textContent =
+      'LOCAL BROKER: RECONNECTING';
 
-  c.connect({
-    useSSL:true,
-    cleanSession:true,
-    keepAliveInterval:30,
-    timeout:10,
+    $('brokerPill').className = 'pill bad';
 
-    onSuccess: () => {
-      if (mqttClient !== c) {
-        return;
-      }
+    refreshNodes();
 
-      $('brokerPill').textContent =
-        'BROKER: ONLINE';
+    setTimeout(connectBroker, 3500);
+  };
 
-      $('brokerPill').className =
-        'pill good';
+  mqtt.onMessage = onMqtt;
 
-      const topics = [
-        'coldchain/+/+/temperature',
-        'coldchain/+/+/status',
-        'coldchain/alerts/#',
-        S1_TEMP,
-        S1_STATE,
-        S1_STATUS
-      ];
+  try {
+    mqtt.connect();
+  }
+  catch (e) {
+    console.error(e);
+    setTimeout(connectBroker, 3500);
+  }
+}
 
-      topics.forEach(topic => {
-        c.subscribe(topic,{
-          qos:0,
+function log(kind, topic, msg) {
+  $('msgCount').textContent = (++count) + ' msgs';
 
-          onSuccess: () => {
-            console.log(
-              '[MQTT SUBSCRIBED]',
-              topic
-            );
-          },
+  const el = document.createElement('div');
+  el.className = 'log-row ' + kind;
 
-          onFailure: e => {
-            console.error(
-              '[MQTT SUBSCRIBE FAILED]',
-              topic,
-              e
-            );
-          }
-        });
-      });
+  el.textContent =
+    new Date().toLocaleTimeString('en-GB') +
+    ' ' +
+    topic +
+    ' ' +
+    String(msg).slice(0, 160);
 
-      logMsg(
-        '',
-        'system',
-        'Connected — subscribed to S1 and S2–S6 topics'
-      );
+  $('mqttLog').appendChild(el);
 
-      renderRegulator();
-    },
+  if ($('mqttLog').children.length > 250) {
+    $('mqttLog').firstChild.remove();
+  }
 
-    onFailure: e => {
-      if (mqttClient !== c) {
-        return;
-      }
+  $('mqttLog').scrollTop =
+    $('mqttLog').scrollHeight;
+}
 
-      $('brokerPill').textContent =
-        'BROKER: FAILED';
+function alertLine(kind, msg) {
+  const el = document.createElement('div');
+  el.className = 'alert-row';
 
-      $('brokerPill').className =
-        'pill bad';
+  el.textContent =
+    new Date().toLocaleTimeString('en-GB') +
+    ' ' +
+    kind +
+    ': ' +
+    msg;
 
-      renderRegulator();
+  $('alertLog').prepend(el);
 
-      if (!reconnectTimer) {
-        reconnectTimer = setTimeout(() => {
-          reconnectTimer = null;
-          connectBroker();
-        },4500);
-      }
-    }
-  });
+  if ($('alertLog').children.length > 80) {
+    $('alertLog').lastChild.remove();
+  }
+}
+
+function clearLog() {
+  $('mqttLog').textContent = '';
+  count = 0;
+  $('msgCount').textContent = '0 msgs';
 }
 
 function toggleNode(id) {
-  if (id === 'S1') {
-    s1.feedback =
-      'S1 is managed by Wokwi. Use Wokwi to start or stop it.';
+  if (id === 'S1' || !mqtt.isConnected()) return;
 
-    s1.feedbackClass = 'error';
-    renderRegulator();
-    return;
-  }
+  state[id].manualOff = !state[id].manualOff;
 
-  if (!connected()) {
-    return;
-  }
-
-  const n = data[id];
-  n.manualOff = !n.manualOff;
-
-  const msg = new Paho.MQTT.Message(
-    n.manualOff ? 'offline' : 'online'
+  mqtt.publish(
+    `coldchain/zone${NODE_ZONE[id]}/${id}/status`,
+    state[id].manualOff ? 'offline' : 'online',
+    1
   );
 
-  msg.destinationName =
-    `${STD}/zone${NODE_ZONE[id]}/${id}/status`;
-
-  msg.qos = 1;
-  msg.retained = false;
-
-  mqttClient.send(msg);
-
-  if (n.manualOff) {
-    n.seen = 0;
+  if (state[id].manualOff) {
+    state[id].seen = 0;
   }
 
-  renderNodes();
-
-  addAlert(
-    n.manualOff ? 'offline' : 'recover',
-    id +
-      ' manually ' +
-      (n.manualOff ? 'disabled' : 'revived')
+  alertLine(
+    state[id].manualOff ? 'OFFLINE' : 'RECOVER',
+    id + ' manually ' +
+      (state[id].manualOff ? 'disabled' : 'revived')
   );
+
+  refreshNodes();
 }
 
 function healAll() {
   IDS.filter(
-    id =>
-      id !== 'S1' &&
-      data[id].manualOff
+    id => id !== 'S1' && state[id].manualOff
   ).forEach(toggleNode);
 }
 
 function killRandom() {
   const a = IDS.filter(
-    id =>
-      id !== 'S1' &&
-      !data[id].manualOff
+    id => id !== 'S1' && !state[id].manualOff
   );
 
   if (a.length) {
@@ -1700,404 +1914,361 @@ function killRandom() {
 }
 
 function triggerBreach() {
-  if (!connected()) {
-    return;
-  }
+  if (!mqtt.isConnected()) return;
 
-  const msg = new Paho.MQTT.Message(
+  mqtt.publish(
+    'coldchain/alerts/breach',
     JSON.stringify({
       node:'S6',
       zone:'zoneC',
       temp:14,
       type:'COOLING',
       ts:Date.now()
-    })
+    }),
+    1
   );
 
-  msg.destinationName =
-    'coldchain/alerts/breach';
-
-  msg.qos = 1;
-  mqttClient.send(msg);
-
-  addAlert(
-    'breach',
-    'S6 manual trigger +14°C'
+  alertLine(
+    'BREACH',
+    'S6 manual breach alert published'
   );
-}
-
-function clearLog() {
-  $('mqttLog').textContent = '';
-  logCount = 0;
-  $('msgCount').textContent = '0 msgs';
 }
 
 function renderStats() {
   $('statsContainer').innerHTML =
-    Object.entries(ZONES).map(([z,zone]) => {
-      const reads = zone.nodes.filter(
-        id => fresh(id)
-      );
-
-      const temps = reads.map(
-        id => data[id].temp
-      );
-
-      const hums = reads.map(
-        id => data[id].hum
+    Object.values(ZONES).map(z => {
+      const live = z.nodes.filter(online);
+      const ts = live.map(id => state[id].temp);
+      const hs = live.map(
+        id => state[id].hum
       ).filter(Number.isFinite);
 
-      const fmt = a => a.length
-        ? `${Math.min(...a).toFixed(1)} / ${(a.reduce((s,n)=>s+n,0)/a.length).toFixed(1)} / ${Math.max(...a).toFixed(1)}`
+      const format = a => a.length
+        ? `${Math.min(...a).toFixed(1)} / ${(a.reduce((x,y) => x+y,0)/a.length).toFixed(1)} / ${Math.max(...a).toFixed(1)}`
         : '— / — / —';
 
       return `
         <div class="zone-stat">
-          <b style="color:${zone.color}">
-            ${zone.name}
-          </b>
-
+          <b style="color:${z.color}">${z.name}</b>
           <div class="mini-values">
             <span>Temp min / avg / max</span>
-            <b>${fmt(temps)}</b>
+            <b>${format(ts)}</b>
           </div>
-
           <div class="mini-values">
-            <span>Humid min / avg / max</span>
-            <b>${fmt(hums)}</b>
+            <span>Humidity min / avg / max</span>
+            <b>${format(hs)}</b>
           </div>
         </div>
       `;
     }).join('');
 }
 
-function switchChart(w) {
-  activeChart = w;
-
-  $('tempChart').style.display =
-    w === 'temp' ? 'block' : 'none';
-
-  $('humChart').style.display =
-    w === 'hum' ? 'block' : 'none';
-
-  $('tabTemp').classList.toggle(
-    'active',
-    w === 'temp'
-  );
-
-  $('tabHum').classList.toggle(
-    'active',
-    w === 'hum'
-  );
-
-  drawCharts();
-}
-
-function canvasCtx(id) {
+function canvas(id) {
   const el = $(id);
-
-  const w = Math.max(
-    el.clientWidth,
-    200
-  );
-
-  const h = Math.max(
-    el.clientHeight,
-    150
-  );
-
+  const w = Math.max(200, el.clientWidth);
+  const h = Math.max(150, el.clientHeight);
   const d = window.devicePixelRatio || 1;
+  const pixelWidth = Math.round(w * d);
+  const pixelHeight = Math.round(h * d);
 
-  if (
-    el.width !== Math.round(w*d) ||
-    el.height !== Math.round(h*d)
-  ) {
-    el.width = Math.round(w*d);
-    el.height = Math.round(h*d);
+  if (el.width !== pixelWidth || el.height !== pixelHeight) {
+    el.width = pixelWidth;
+    el.height = pixelHeight;
   }
 
-  const ctx = el.getContext('2d');
-
-  ctx.setTransform(d,0,0,d,0,0);
-  ctx.clearRect(0,0,w,h);
-
-  return {ctx,w,h};
+  const c = el.getContext('2d');
+  c.setTransform(d, 0, 0, d, 0, 0);
+  c.clearRect(0, 0, w, h);
+  return {c,w,h};
 }
 
-function drawSeries(
-  id,
-  values,
-  color,
-  min,
-  max,
-  bg=false
-) {
-  const {ctx,w,h} = canvasCtx(id);
+function series(id, points, color, min, max, bg=false) {
+  const {c,w,h} = canvas(id);
 
-  if (!values.length) {
-    return;
-  }
+  if (!points.length) return;
 
-  const pad = bg ? 20 : 36;
-  const iW = w - pad - 18;
-  const iH = h - 42;
+  const pad = bg ? 20 : 35;
+  const iw = w - pad - 18;
+  const ih = h - 42;
 
   const x = i =>
     pad +
-    (values.length === 1
-      ? iW
-      : iW*i/(values.length-1));
+    (points.length === 1
+      ? iw
+      : iw*i/(points.length-1));
 
   const y = v =>
-    20 +
-    iH -
-    (v-min)/(max-min)*iH;
+    20 + ih - (v-min)/(max-min)*ih;
 
-  ctx.strokeStyle =
-    bg ? '#ffffff33' : '#e5e9ee';
+  c.strokeStyle = bg ? '#ffffff44' : '#e5e9ee';
+  c.lineWidth = 1;
 
-  ctx.lineWidth = 1;
-
-  for (let j=0;j<=4;j++) {
-    const gy = 20+j*iH/4;
-
-    ctx.beginPath();
-    ctx.moveTo(pad,gy);
-    ctx.lineTo(w-18,gy);
-    ctx.stroke();
+  for (let j=0; j<=4; j++) {
+    const yy = 20 + ih*j/4;
+    c.beginPath();
+    c.moveTo(pad, yy);
+    c.lineTo(w-18, yy);
+    c.stroke();
   }
 
-  if (values.length>1) {
-    ctx.beginPath();
+  c.beginPath();
 
-    values.forEach((v,i) =>
-      i
-        ? ctx.lineTo(x(i),y(v))
-        : ctx.moveTo(x(i),y(v))
-    );
+  points.forEach((v,i) =>
+    i
+      ? c.lineTo(x(i), y(v))
+      : c.moveTo(x(i), y(v))
+  );
 
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-  }
+  c.lineWidth = 2.5;
+  c.strokeStyle = color;
+  c.stroke();
 
-  const last = values[values.length-1];
-
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.arc(
-    x(values.length-1),
-    y(last),
+  c.fillStyle = color;
+  c.beginPath();
+  c.arc(
+    x(points.length-1),
+    y(points.at(-1)),
     4,
     0,
     Math.PI*2
   );
-  ctx.fill();
+  c.fill();
 
   if (!bg) {
-    ctx.fillStyle = '#778497';
-    ctx.font = '11px Inter,Arial';
+    c.fillStyle = '#7a8494';
+    c.font = '11px Segoe UI,Arial';
 
-    ctx.fillText(
-      'Latest: '+last.toFixed(1),
+    c.fillText(
+      'Latest: ' + points.at(-1).toFixed(1),
       pad,
-      14
+      13
     );
   }
 }
 
 function drawCharts() {
-  drawSeries(
+  series(
     'overviewCanvas',
-    data.S6.history,
-    'white',
-    0,
-    14,
-    true
+    state.S6.temps,
+    '#fff',
+    0,14,true
   );
 
-  drawSeries(
+  series(
     'tempChart',
-    data.S6.history,
+    state.S6.temps,
     '#d97706',
-    0,
-    14
+    0,14
   );
 
-  drawSeries(
+  series(
     'humChart',
-    data.S6.humidityHistory,
+    state.S6.hums,
     '#0891b2',
-    0,
-    100
+    0,100
   );
 }
 
-const EDGES = [
-  ['root','routerA'],
-  ['root','routerB'],
-  ['root','routerC'],
-  ['routerA','S1'],
-  ['routerA','S2'],
-  ['routerB','S3'],
-  ['routerB','S4'],
-  ['routerC','S5'],
-  ['routerC','S6']
-];
+function switchChart(t) {
+  $('tempChart').style.display =
+    t === 'temp' ? 'block' : 'none';
+
+  $('humChart').style.display =
+    t === 'hum' ? 'block' : 'none';
+
+  $('tabTemp').classList.toggle(
+    'active',
+    t === 'temp'
+  );
+
+  $('tabHum').classList.toggle(
+    'active',
+    t === 'hum'
+  );
+
+  drawCharts();
+}
 
 function drawDodag() {
-  const {ctx,w,h} = canvasCtx('dodagCanvas');
-
-  const pos = {
-    root:[.5,.12],
-    routerA:[.18,.47],
-    routerB:[.5,.47],
-    routerC:[.82,.47],
-    S1:[.08,.84],
-    S2:[.29,.84],
-    S3:[.41,.84],
-    S4:[.59,.84],
-    S5:[.71,.84],
-    S6:[.92,.84]
+  const {c,w,h} = canvas('dodagCanvas');
+  const points = {
+    root:[0.50,0.11],
+    routerA:[0.18,0.43],
+    routerB:[0.50,0.43],
+    routerC:[0.82,0.43],
+    S1:[0.09,0.79],
+    S2:[0.27,0.79],
+    S3:[0.41,0.79],
+    S4:[0.59,0.79],
+    S5:[0.73,0.79],
+    S6:[0.91,0.79]
   };
 
-  const pt = id => [
-    w*pos[id][0],
-    h*pos[id][1]
-  ];
+  const pos = id => ({
+    x:w * points[id][0],
+    y:h * points[id][1]
+  });
 
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0,0,w,h);
+  const isUpVisible = dodag.view !== 'down';
+  const isDownVisible = dodag.view !== 'up';
+  const links = Object.entries(DODAG_PARENT);
 
-  for (const [a,b] of EDGES) {
-    const p = pt(a);
-    const q = pt(b);
+  c.save();
+  c.lineWidth = 1;
+  c.strokeStyle = '#eef2f6';
+  c.setLineDash([4,6]);
+  for (const y of [h*.11,h*.43,h*.79]) {
+    c.beginPath();
+    c.moveTo(18,y);
+    c.lineTo(w-18,y);
+    c.stroke();
+  }
+  c.setLineDash([]);
+  c.restore();
 
-    ctx.beginPath();
-    ctx.moveTo(...p);
-    ctx.lineTo(...q);
+  c.fillStyle = '#91a0b5';
+  c.textAlign = 'left';
+  c.font = '10px Segoe UI,Arial';
+  c.fillText('RANK 1  ·  ROOT', 16, 17);
+  c.fillText('RANK 2  ·  ZONE ROUTERS', 16, h*.30);
+  c.fillText('RANK 3  ·  SENSOR NODES', 16, h*.66);
 
-    ctx.strokeStyle =
-      DOG[b].alive
-        ? '#a5b4fc'
-        : '#e2e8f0';
+  for (const [child,parent] of links) {
+    const a = pos(parent);
+    const b = pos(child);
+    const active = child.startsWith('S') ? online(child) : true;
 
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    c.beginPath();
+    c.moveTo(a.x,a.y);
+    c.lineTo(b.x,b.y);
+    c.strokeStyle = active ? '#bac8dc' : '#e1e6ef';
+    c.lineWidth = active ? 2.8 : 1.6;
+    c.stroke();
+
+    const drawArrow = (from,to,color,offset) => {
+      const dx = to.x-from.x;
+      const dy = to.y-from.y;
+      const len = Math.hypot(dx,dy) || 1;
+      const ux = dx/len, uy = dy/len;
+      const nx = -uy, ny = ux;
+      const x = from.x + dx*.52 + nx*offset;
+      const y = from.y + dy*.52 + ny*offset;
+      const size = 6.3;
+      c.beginPath();
+      c.moveTo(x+ux*size, y+uy*size);
+      c.lineTo(x-ux*size*.65 + nx*size*.53, y-uy*size*.65 + ny*size*.53);
+      c.lineTo(x-ux*size*.65 - nx*size*.53, y-uy*size*.65 - ny*size*.53);
+      c.closePath();
+      c.fillStyle = color;
+      c.fill();
+    };
+
+    if (isUpVisible && active) drawArrow(b,a,'#06b6d4',6);
+    if (isDownVisible && active) drawArrow(a,b,'#f59e0b',-6);
   }
 
-  for (const [id,v] of Object.entries(DOG)) {
-    const [x,y] = pt(id);
-    const isLeaf = id.startsWith('S');
+  const now = performance.now();
+  dodag.packets = dodag.packets.filter(packet => now - packet.start < packet.duration);
 
-    const color = !v.alive
-      ? '#cbd5e1'
-      : isLeaf
-        ? ZONES[NODE_ZONE[id]]?.color || '#888'
-        : id === 'root'
-          ? '#64748b'
-          : '#8b5cf6';
+  for (const packet of dodag.packets) {
+    if (dodag.view === 'up' && packet.kind === 'down') continue;
+    if (dodag.view === 'down' && packet.kind !== 'down') continue;
 
-    ctx.fillStyle = color;
+    const start = pos(packet.path[0]);
+    const middle = pos(packet.path[1]);
+    const end = pos(packet.path[2]);
+    const d1 = Math.hypot(middle.x-start.x, middle.y-start.y);
+    const d2 = Math.hypot(end.x-middle.x, end.y-middle.y);
+    const fraction = Math.min(1,Math.max(0,(now-packet.start)/packet.duration));
+    const distance = fraction*(d1+d2);
+    const from = distance < d1 ? start : middle;
+    const to = distance < d1 ? middle : end;
+    const step = distance < d1 ? distance/Math.max(d1,1) : (distance-d1)/Math.max(d2,1);
+    const x = from.x+(to.x-from.x)*step;
+    const y = from.y+(to.y-from.y)*step;
+    const color = packet.kind === 'down'
+      ? '#f59e0b'
+      : packet.kind === 'ack' ? '#10b981' : '#06b6d4';
 
-    ctx.beginPath();
-    ctx.arc(
-      x,
-      y,
-      isLeaf ? 16 : 19,
-      0,
-      Math.PI*2
-    );
-    ctx.fill();
-
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = 'bold 11px Inter,Arial';
-    ctx.fillText(id,x,y);
-
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px Inter,Arial';
-
-    ctx.fillText(
-      'rank '+v.rank,
-      x,
-      y+29
-    );
+    c.save();
+    c.globalAlpha = packet.demonstration ? .78 : 1;
+    c.shadowColor = color;
+    c.shadowBlur = 14;
+    c.fillStyle = color;
+    c.beginPath();
+    c.arc(x,y,6.5,0,Math.PI*2);
+    c.fill();
+    c.shadowBlur = 0;
+    c.fillStyle = '#fff';
+    c.beginPath();
+    c.arc(x,y,2.1,0,Math.PI*2);
+    c.fill();
+    c.restore();
   }
+
+  for (const id of Object.keys(points)) {
+    const {x,y} = pos(id);
+    const leaf = id.startsWith('S');
+    const active = !leaf || online(id);
+    const radius = leaf ? 15.5 : 21;
+    const fill = leaf
+      ? active ? ZONES[NODE_ZONE[id]].color : '#cbd5e1'
+      : id === 'root' ? '#334155' : '#8b5cf6';
+
+    c.beginPath();
+    c.arc(x,y,radius+3,0,Math.PI*2);
+    c.fillStyle = '#fff';
+    c.fill();
+    c.beginPath();
+    c.arc(x,y,radius,0,Math.PI*2);
+    c.fillStyle = fill;
+    c.fill();
+
+    c.font = 'bold 11px Segoe UI,Arial';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillStyle = '#fff';
+    c.fillText(id,x,y);
+
+    c.font = '10px Segoe UI,Arial';
+    c.fillStyle = active ? '#66758a' : '#9ca7b7';
+    if (leaf) {
+      c.fillText(active ? 'online' : 'offline',x,y+27);
+    } else if (id === 'root') {
+      c.fillText('border router',x,y+35);
+    } else {
+      c.fillText('rank 2',x,y+34);
+    }
+  }
+
+  const badge = $('dodagLive');
+  badge.classList.toggle('connected', mqtt.isConnected());
+  badge.textContent = mqtt.isConnected() ? '● LIVE MQTT' : 'MQTT DISCONNECTED';
 }
 
-function logMsg(kind,topic,text) {
-  logCount++;
-
-  $('msgCount').textContent =
-    logCount + ' msgs';
-
-  const row = document.createElement('div');
-
-  row.className =
-    'log-row ' + kind;
-
-  row.textContent =
-    new Date().toLocaleTimeString('en-GB') +
-    '  ' +
-    topic +
-    '  ' +
-    String(text).slice(0,150);
-
-  $('mqttLog').appendChild(row);
-
-  if ($('mqttLog').children.length>250) {
-    $('mqttLog').removeChild(
-      $('mqttLog').firstChild
-    );
-  }
-
-  $('mqttLog').scrollTop =
-    $('mqttLog').scrollHeight;
+function animateDodag() {
+  drawDodag();
+  requestAnimationFrame(animateDodag);
 }
 
-function addAlert(name,desc) {
-  const row = document.createElement('div');
-
-  row.className = 'alert-row';
-
-  row.textContent =
-    new Date().toLocaleTimeString('en-GB') +
-    '  ' +
-    name.toUpperCase() +
-    ': ' +
-    desc;
-
-  $('alertLog').prepend(row);
-
-  if ($('alertLog').children.length>80) {
-    $('alertLog').lastChild.remove();
-  }
-}
-
-function periodic() {
-  renderNodes();
-  renderRegulator();
+function refresh() {
+  refreshNodes();
   renderStats();
   drawCharts();
-  drawDodag();
 }
 
 buildZones();
-renderNodes();
-renderRegulator();
-renderStats();
-drawCharts();
-drawDodag();
+setDodagView('both');
+refresh();
 connectBroker();
+requestAnimationFrame(animateDodag);
 
-setInterval(periodic,1500);
+setInterval(refresh,1500);
 
-window.addEventListener('resize',() => {
+window.addEventListener('resize', () => {
   drawCharts();
-  drawDodag();
 });
 </script>
+
 </body>
 </html>
